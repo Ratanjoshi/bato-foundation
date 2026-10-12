@@ -72,13 +72,13 @@ export default function SideMenu({
           <img
             src={FullLogo}
             alt="Logo"
-            className={`h-[3rem] object-contain`}
+            className={`h-[3rem] object-contain `}
           />
         ) : (
           <img
             src={SmallLogo}
             alt="Logo"
-            className={`h-[3rem] object-contain`}
+            className={`h-[3rem] object-contain `}
           />
         )}
 

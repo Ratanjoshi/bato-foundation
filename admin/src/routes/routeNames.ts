@@ -67,3 +67,11 @@ export const CAREER_ADD_ROUTE = "/admin/career/";
 
 export const APPLICANT_LIST_ROUTE = "/admin/applicant/list";
 export const APPLICANT_ADD_ROUTE = "/admin/applicant";
+
+export const BATO_PROGRAM_LIST_ROUTE = "/admin/bato-program/list";
+export const BATO_PROGRAM_ADD_ROUTE = "/admin/bato-program/";
+
+export const BESIDES_PROGRAM_LIST_ROUTE = "/admin/besides-program/list";
+export const BESIDES_PROGRAM_ADD_ROUTE = "/admin/besides-program/";
+export const ULTIMATE_DREAM_ROUTE = "/admin/ultimate-dream";
+export const ABOUT_PREVIEW_ROUTE = "/admin/bato-home/about-preview";

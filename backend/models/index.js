@@ -12,10 +12,8 @@ const db = {};
 
 let sequelize;
 if (config.use_env_variable) {
-  console.log("====================================");
   sequelize = new Sequelize(process.env[config.use_env_variable], config);
 } else {
-  console.log("=--------------------------------------");
   sequelize = new Sequelize(
     config.database,
     config.username,
@@ -33,6 +31,7 @@ sequelize
     console.error("Unable to connect to the database:", err);
   });
 
+// ---------- Load models ----------
 fs.readdirSync(__dirname)
   .filter((file) => {
     return (
@@ -44,17 +43,24 @@ fs.readdirSync(__dirname)
       sequelize,
       Sequelize.DataTypes,
     );
-    let name = _.camelCase(model.name) + "Model";
-    db[name] = model;
+
+    // ✅ Register by ORIGINAL model name (used inside associate())
+    db[model.name] = model;
+
+    // ✅ ALSO register by camelCase + "Model" (backward-compat)
+    db[_.camelCase(model.name) + "Model"] = model;
   });
 
-Object.keys(db).forEach((modelName) => {
-  if (db[modelName].associate) {
-    db[modelName].associate(db);
-  }
+// ---------- Run associations ONCE per unique class ----------
+const seen = new Set();
+Object.keys(db).forEach((key) => {
+  const model = db[key];
+  if (!model || !model.associate) return;
+  if (seen.has(model)) return; // ✅ skip duplicates (User === userModel)
+  seen.add(model);
+  model.associate(db);
 });
 
-console.log("<<<--------- Database Models ----------->>>", db);
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;
 

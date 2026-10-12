@@ -42,6 +42,15 @@ import AddEditCareerCategory from "@/pages/CareerCategory/AddEditCareerCategory"
 import Career from "@/pages/Career";
 import AddEditCareer from "@/pages/Career/AddEditCareer";
 import Applicant from "@/pages/Applicant";
+import BatoProgramList from "@/pages/BatoProgram";
+import AddEditBatoProgram from "@/pages/BatoProgram/AddEditBatoProgram";
+import BesidesProgramList from "@/pages/BesidesProgram";
+import AddEditBesidesProgram from "@/pages/BesidesProgram/AddEditBesidesProgram";
+import UltimateDream from "@/pages/UltimateDream";
+
+// ✅ NEW: About Preview page
+import AboutPreview from "@/pages/AboutPreview";
+
 export const adminLinks = [
   {
     path: "/dashboard",
@@ -270,5 +279,39 @@ export const adminLinks = [
   {
     path: "/applicant/list",
     element: <Applicant />,
+  },
+  {
+    path: "/bato-program/list",
+    element: <BatoProgramList />,
+  },
+  {
+    path: "/bato-program/",
+    element: <AddEditBatoProgram />,
+  },
+  {
+    path: "/bato-program/:id",
+    element: <AddEditBatoProgram />,
+  },
+  {
+    path: "/besides-program/list",
+    element: <BesidesProgramList />,
+  },
+  {
+    path: "/besides-program/",
+    element: <AddEditBesidesProgram />,
+  },
+  {
+    path: "/besides-program/:id",
+    element: <AddEditBesidesProgram />,
+  },
+  {
+    path: "/ultimate-dream",
+    element: <UltimateDream />,
+  },
+
+  // ✅ NEW: BATO Home → About Preview
+  {
+    path: "/bato-home/about-preview",
+    element: <AboutPreview />,
   },
 ];

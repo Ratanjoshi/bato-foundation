@@ -15,3 +15,5 @@ export const CAREER_CATEGORY_URL = "career-category/";
 export const CAREER_URL = "career/";
 
 export const APPLICANT_URL = "applicant/";
+export const ULTIMATE_DREAM_URL = "ultimate-dream/";
+export const ABOUT_PREVIEW_URL = "about-preview/";

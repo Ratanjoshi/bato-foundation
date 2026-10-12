@@ -15,7 +15,11 @@ function checkViewAccessList() {
   const viewAccessList = access
     .filter((each) => each.key === "view")
     .map((each) => each.list);
-  return viewAccessList;
+
+  // ✅ Menus we want visible even without a DB permission row
+  const manualExtras = ["Besides Programs"];
+
+  return [...viewAccessList, ...manualExtras];
 }
 
 export { checkAccess, checkViewAccessList };

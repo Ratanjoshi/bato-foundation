@@ -57,7 +57,9 @@ app.use(
 const allowedOrigins = [
   "http://192.168.1.251:2004",
   "https://staging.unimomo.co.uk", // frontend URL
-  "https://admin.unimomo.co.uk", // frontend URL
+  "https://admin.unimomo.co.uk",
+  "http://localhost:2004", // frontend URL
+  // frontend URL
 ];
 
 app.use(
@@ -150,7 +152,7 @@ app.use("/setup/", setupPath);
 
 app.use("/public", express.static(path.join(__dirname, "public")));
 app.use(
-  "/uploads",
+  "/resources",
   // authentication,
   express.static(path.join(__dirname, "uploads")),
 );

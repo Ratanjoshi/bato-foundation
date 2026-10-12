@@ -4,6 +4,7 @@ import { ProgramExplorer } from "@/components/programs/ProgramExplorer";
 import { BesidesPrograms } from "@/components/programs/BesidesPrograms";
 import { UltimateDream } from "@/components/programs/UltimateDream";
 import { DonationCTA } from "@/components/shared/DonationCTA";
+import { getUltimateDream, resolveImageUrl } from "@/lib/api/ultimateDream";
 
 export const metadata: Metadata = {
   title: "Our Programs",
@@ -11,7 +12,44 @@ export const metadata: Metadata = {
     "Explore BATO Foundation's STEM, robotics, coding, AI and community technology programs across Nepal.",
 };
 
-export default function ProgramsPage() {
+const FALLBACK = {
+  eyebrow: "Our Ultimate Dream",
+  heading: "A Nepal where no child's future is decided by a missing road.",
+  description:
+    "We dream of classrooms in every valley where robots are built, code is written, and possibility has no postcode.",
+  buttonLabel: "Help Build the Dream",
+  buttonHref: "/donate",
+  image: {
+    url: "/images/hero/girl-mountains.jpg",
+    alt: "A student looking toward the horizon",
+  },
+};
+
+async function loadUltimateDream() {
+  try {
+    const dream = await getUltimateDream();
+    if (!dream) return FALLBACK;
+
+    return {
+      eyebrow: dream.eyebrow || FALLBACK.eyebrow,
+      heading: dream.heading || FALLBACK.heading,
+      description: dream.description || FALLBACK.description,
+      buttonLabel: dream.button_label || FALLBACK.buttonLabel,
+      buttonHref: dream.button_href || FALLBACK.buttonHref,
+      image: {
+        url: resolveImageUrl(dream.image_url) ?? FALLBACK.image.url,
+        alt: dream.image_alt || FALLBACK.image.alt,
+      },
+    };
+  } catch (err) {
+    console.error("Ultimate Dream fetch failed:", err);
+    return FALLBACK;
+  }
+}
+
+export default async function ProgramsPage() {
+  const ultimateDream = await loadUltimateDream();
+
   return (
     <>
       <PageHeader
@@ -22,7 +60,7 @@ export default function ProgramsPage() {
       />
       <ProgramExplorer />
       <BesidesPrograms />
-      <UltimateDream />
+      <UltimateDream data={ultimateDream} />
       <DonationCTA />
     </>
   );

@@ -1208,6 +1208,50 @@
           "list": "Customer"
         }
       ]
+    },
+    {
+      "title": "ultimate dream",
+      "key": "ultimate dream",
+      "actions": [
+        {
+          "title": "View Ultimate Dream",
+          "key": "view",
+          "clientPath": "/admin/ultimate-dream",
+          "serverPath": "/ultimate-dream/admin",
+          "requestMethod": "GET",
+          "list": "Ultimate Dream"
+        },
+        {
+          "title": "Edit Ultimate Dream",
+          "key": "edit",
+          "clientPath": "/admin/ultimate-dream",
+          "serverPath": "/ultimate-dream/:id",
+          "requestMethod": "PUT",
+          "list": "Ultimate Dream"
+        }
+      ]
+    },
+    {
+      "title": "About Preview",
+      "key": "aboutPreview",
+      "actions": [
+        {
+          "title": "View About Preview",
+          "key": "view",
+          "clientPath": "/about-preview",
+          "serverPath": "/about-preview",
+          "requestMethod": "GET",
+          "list": "About Preview"
+        },
+        {
+          "title": "Edit About Preview",
+          "key": "edit",
+          "clientPath": "/about-preview",
+          "serverPath": "/about-preview",
+          "requestMethod": "PUT",
+          "list": "About Preview"
+        }
+      ]
     }
   ]
 }

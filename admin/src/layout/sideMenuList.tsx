@@ -10,7 +10,7 @@ import {
   MdPeopleAlt,
 } from "react-icons/md";
 import { RiSeoLine } from "react-icons/ri";
-import { GiKnightBanner } from "react-icons/gi";
+import { GiKnightBanner, GiProgression } from "react-icons/gi";
 
 import { GrServices, GrTechnology } from "react-icons/gr";
 import { AiFillPropertySafety } from "react-icons/ai";
@@ -18,6 +18,7 @@ import { SiHomepage } from "react-icons/si";
 import { FaBlog, FaBriefcase } from "react-icons/fa";
 import { TbLogs } from "react-icons/tb";
 import { HiNewspaper } from "react-icons/hi";
+import { Sparkles, Home } from "lucide-react"; // ✅ Added Home
 
 export type SideListMenuType = {
   key: number;
@@ -107,6 +108,46 @@ export const SideMenuList: SideListMenuType[] = [
     name: "Technology",
     path: "/admin/technology/list",
     icon: <GrTechnology />,
+  },
+  {
+    key: 13,
+    name: "BATO Foundation",
+    icon: <GiProgression />,
+    menu: [
+      {
+        key: 13.1,
+        name: "BATO Programs",
+        path: "/admin/bato-program/list",
+        icon: <GiProgression />,
+      },
+      {
+        key: 13.2,
+        name: "Besides Programs",
+        path: "/admin/besides-program/list",
+        icon: <Sparkles />,
+      },
+      {
+        key: 13.3,
+        name: "Ultimate Dream",
+        path: "/admin/ultimate-dream",
+        icon: <Sparkles />,
+      },
+    ],
+  },
+  // ✅ NEW: BATO Home section
+  {
+    key: 14,
+    name: "BATO Home",
+    icon: <Home />,
+    menu: [
+      {
+        key: 14.1,
+        name: "About Preview",
+        path: "/admin/bato-home/about-preview",
+        icon: <Sparkles />,
+      },
+      // 👇 Add future BATO Home items here later (Hero, Mission, Stats, etc.)
+    ],
   },
   {
     key: 9,

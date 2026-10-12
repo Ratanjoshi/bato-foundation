@@ -27,19 +27,21 @@ export const ProtectedRoute: React.FC<ProtectedRouteType> = ({ children }) => {
       if (status === 401 || status === 403) {
         deleteToken("token");
         dispatch(clearProfile());
-        navigate("/", { replace: true });
+        navigate("/", { replace: true }); // or "/login" if that is your login route
       }
     }
-  }, [error]);
+  }, [error, dispatch, navigate]);
 
   useEffect(() => {
     if (userProfile && userProfile.data) {
       dispatch(setProfile(userProfile.data));
     }
-  }, [userProfile, success]);
+  }, [userProfile, success, dispatch]);
 
+  // Not authenticated → redirect to login
   if (!auth) {
-    return <Navigate to="/" />;
+    return <Navigate to="/" replace />; // change to "/login" if needed
   }
-  return children;
+
+  return <>{children}</>;
 };
