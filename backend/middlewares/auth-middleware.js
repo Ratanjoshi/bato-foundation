@@ -19,7 +19,7 @@ const authMiddleware = {};
 authMiddleware.authentication = async (req, res, next) => {
   try {
     let token =
-      req.body.token ||
+      req.body?.token ||
       req.query.token ||
       req.headers["x-access-token"] ||
       req.headers.authorization ||
@@ -90,7 +90,7 @@ authMiddleware.authentication = async (req, res, next) => {
 authMiddleware.byPassAuthentication_main = async (req, res, next) => {
   try {
     let token =
-      req.body.token ||
+      req.body?.token ||
       req.query.token ||
       req.headers["x-access-token"] ||
       req.headers.authorization ||
@@ -118,7 +118,7 @@ authMiddleware.byPassAuthentication_main = async (req, res, next) => {
 authMiddleware.authenticationForLogout = async (req, res, next) => {
   try {
     let token =
-      req.body.token ||
+      req.body?.token ||
       req.query.token ||
       req.headers["x-access-token"] ||
       req.headers.authorization ||
@@ -275,7 +275,7 @@ authMiddleware.authorization = async (req, res, next) => {
 authMiddleware.authorizationByPass = async (req, res, next) => {
   try {
     let token =
-      req.body.token ||
+      req.body?.token ||
       req.query.token ||
       req.headers["x-access-token"] ||
       req.headers.authorization ||

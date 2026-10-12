@@ -2166,6 +2166,38 @@ module.exports = {
         message: "Blog Delete Failure",
       },
     },
+    BATO_PROGRAM: {
+      CREATE_SUCCESS: {
+        status: httpStatus.OK,
+        success: true,
+        message: "Program Created Successfully",
+      },
+      FOUND: {
+        status: httpStatus.OK,
+        success: true,
+        message: "Program Found",
+      },
+      NOT_FOUND: {
+        status: httpStatus.NOT_FOUND,
+        success: false,
+        message: "Program Not Found",
+      },
+      LIST_SUCCESS: {
+        status: httpStatus.OK,
+        success: true,
+        message: "Program List Success",
+      },
+      UPDATE_SUCCESS: {
+        status: httpStatus.OK,
+        success: true,
+        message: "Program Updated Successfully",
+      },
+      DELETE_SUCCESS: {
+        status: httpStatus.OK,
+        success: true,
+        message: "Program Deleted Successfully",
+      },
+    },
     SUBSCRIBERS: {
       CREATE_SUBSCRIBERS_SUCCESS: {
         status: httpStatus.OK,

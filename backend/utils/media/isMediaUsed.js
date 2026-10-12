@@ -17,6 +17,8 @@ const {
   serviceUsedCaseModel,
   serviceModel,
   applicantModel,
+  blogModel,
+  BatoProgram,
 } = require("../../models");
 const { Op, literal } = require("sequelize");
 
@@ -135,6 +137,11 @@ async function checkIfMediaPathInUse(mediaPath) {
       model: blogModel,
       fields: ["image"],
       name: "Blog Image",
+    },
+    {
+      model: BatoProgram,
+      fields: ["image"],
+      name: "BATO Program Image",
     },
   ];
 

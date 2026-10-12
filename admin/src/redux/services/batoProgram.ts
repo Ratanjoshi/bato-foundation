@@ -55,7 +55,7 @@ const batoProgramApi = api.injectEndpoints({
           params.set("isPublished", String(isPublished));
         }
 
-        return `bato-program/list?${params.toString()}`;
+        return `bato-program/admin/list?${params.toString()}`;
       },
 
       providesTags: ["bato-program"],

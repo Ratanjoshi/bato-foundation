@@ -1252,6 +1252,68 @@
           "list": "About Preview"
         }
       ]
+    },
+    {
+      "title": "BATO Programs",
+      "key": "BATO Programs",
+      "actions": [
+        {
+          "title": "View BATO Programs",
+          "key": "listPrograms",
+          "clientPath": "/admin/bato-program/list",
+          "serverPath": "/bato-program/admin/list",
+          "requestMethod": "GET",
+          "list": "BATO Programs"
+        },
+        {
+          "title": "Edit BATO Programs",
+          "key": "edit",
+          "clientPath": "/admin/bato-program/:id",
+          "serverPath": "/bato-program/:id",
+          "requestMethod": "PUT",
+          "list": "BATO Programs"
+        },
+        {
+          "title": "View BATO Program",
+          "key": "viewProgram",
+          "clientPath": "/admin/bato-program/:id",
+          "serverPath": "/bato-program/:id",
+          "requestMethod": "GET",
+          "list": "BATO Programs"
+        },
+        {
+          "title": "Create BATO Program",
+          "key": "createProgram",
+          "clientPath": "/admin/bato-program/",
+          "serverPath": "/bato-program",
+          "requestMethod": "POST",
+          "list": "BATO Programs"
+        },
+        {
+          "title": "Update BATO Program",
+          "key": "updateProgram",
+          "clientPath": "/admin/bato-program/:id",
+          "serverPath": "/bato-program/:id",
+          "requestMethod": "PUT",
+          "list": "BATO Programs"
+        },
+        {
+          "title": "Publish BATO Program",
+          "key": "publishProgram",
+          "clientPath": "/admin/bato-program/:id",
+          "serverPath": "/bato-program/:id",
+          "requestMethod": "PATCH",
+          "list": "BATO Programs"
+        },
+        {
+          "title": "Delete BATO Program",
+          "key": "deleteProgram",
+          "clientPath": "/admin/bato-program/:id",
+          "serverPath": "/bato-program/:id",
+          "requestMethod": "DELETE",
+          "list": "BATO Programs"
+        }
+      ]
     }
   ]
 }

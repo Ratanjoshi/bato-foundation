@@ -39,9 +39,6 @@ const mediaApi = api.injectEndpoints({
         url: "media",
         method: "POST",
         body,
-        headers: {
-          "Content-Type": "multipart/form",
-        },
       }),
       invalidatesTags: ["media"],
     }),

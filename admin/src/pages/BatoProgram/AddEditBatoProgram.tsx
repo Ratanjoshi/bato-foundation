@@ -1,9 +1,12 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { useNavigate, useParams } from "react-router-dom";
 
 import Button from "@/components/Button";
 import Input from "@/components/Input";
+import MediaComponent from "@/components/MediaComponent";
+import ImageInputUIComponent from "@/components/ImageInputUIComponent";
+import { useSingleImageHandler } from "@/hooks/useImageHandler";
 
 import { handleError, handleResponse } from "@/utils/responseHandler";
 
@@ -23,7 +26,7 @@ interface FormValues {
   location: string;
   description: string;
   longDescription: string;
-  image?: FileList;
+  image: string;
   isPublished: boolean;
   order: number;
 }
@@ -34,8 +37,6 @@ const AddEditBatoProgram = () => {
   const isEdit = Boolean(id);
 
   const navigate = useNavigate();
-
-  const [preview, setPreview] = useState<string>("");
 
   const { data: detail, isLoading: isLoadingDetail } =
     useGetBatoProgramByIdQuery(id!, {
@@ -52,6 +53,8 @@ const AddEditBatoProgram = () => {
     register,
     handleSubmit,
     control,
+    getValues,
+    setValue,
     reset,
     formState: { errors },
   } = useForm<FormValues>({
@@ -65,8 +68,16 @@ const AddEditBatoProgram = () => {
       longDescription: "",
       isPublished: false,
       order: 0,
+      image: "",
     },
   });
+
+  const {
+    imageUrl,
+    handleConfirmImage,
+    isImageModelOpen,
+    setIsImageModelOpen,
+  } = useSingleImageHandler(setValue, getValues, "image");
 
   /*
   |--------------------------------------------------------------------------
@@ -86,55 +97,12 @@ const AddEditBatoProgram = () => {
         location: d.location ?? "",
         description: d.description ?? "",
         longDescription: d.longDescription ?? "",
+        image: d.image ?? "",
         isPublished: d.isPublished ?? false,
         order: d.order ?? 0,
       });
-
-      if (d.image) {
-        setPreview(d.image);
-      }
     }
   }, [detail, isEdit, reset]);
-
-  /*
-  |--------------------------------------------------------------------------
-  | Image Preview
-  |--------------------------------------------------------------------------
-  */
-
-  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-
-    if (!file) {
-      return;
-    }
-
-    const allowedTypes = [
-      "image/jpeg",
-      "image/jpg",
-      "image/png",
-      "image/webp",
-      "image/gif",
-    ];
-
-    if (!allowedTypes.includes(file.type)) {
-      alert("Please select JPG, JPEG, PNG, WEBP or GIF image.");
-
-      event.target.value = "";
-      return;
-    }
-
-    if (file.size > 5 * 1024 * 1024) {
-      alert("Image size must be less than 5MB.");
-
-      event.target.value = "";
-      return;
-    }
-
-    const imageUrl = URL.createObjectURL(file);
-
-    setPreview(imageUrl);
-  };
 
   /*
   |--------------------------------------------------------------------------
@@ -144,29 +112,7 @@ const AddEditBatoProgram = () => {
 
   const onSubmit = async (values: FormValues) => {
     try {
-      const formData = new FormData();
-
-      formData.append("title", values.title);
-      formData.append("slug", values.slug);
-      formData.append("category", values.category);
-      formData.append("status", values.status);
-      formData.append("location", values.location);
-      formData.append("description", values.description);
-      formData.append("longDescription", values.longDescription);
-
-      formData.append("isPublished", String(values.isPublished));
-
-      formData.append("order", String(Number(values.order || 0)));
-
-      /*
-      |--------------------------------------------------------------------------
-      | Add Image
-      |--------------------------------------------------------------------------
-      */
-
-      if (values.image && values.image.length > 0) {
-        formData.append("image", values.image[0]);
-      }
+      const body = { ...values, order: Number(values.order || 0) };
 
       /*
       |--------------------------------------------------------------------------
@@ -177,7 +123,7 @@ const AddEditBatoProgram = () => {
       if (isEdit && id) {
         const res = await updateProgram({
           id,
-          body: formData,
+          body,
         }).unwrap();
 
         handleResponse({
@@ -185,7 +131,7 @@ const AddEditBatoProgram = () => {
           onSuccess: () => navigate(BATO_PROGRAM_LIST_ROUTE),
         });
       } else {
-        const res = await createProgram(formData).unwrap();
+        const res = await createProgram(body).unwrap();
 
         handleResponse({
           res,
@@ -304,46 +250,20 @@ const AddEditBatoProgram = () => {
 
         <div>
           <label className="input-label">Program Image</label>
-
-          <div className="border border-dashed border-gray-300 rounded-lg p-5">
-            <input
-              type="file"
-              accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
-              {...register("image")}
-              onChange={handleImageChange}
-              className="block w-full text-sm text-gray-600
-                file:mr-4
-                file:py-2
-                file:px-4
-                file:rounded-md
-                file:border-0
-                file:text-sm
-                file:font-medium
-                file:bg-gray-100
-                file:text-gray-700
-                hover:file:bg-gray-200"
-            />
-
-            <p className="text-xs text-gray-500 mt-2">
-              JPG, JPEG, PNG, WEBP or GIF. Maximum size: 5MB.
-            </p>
-
-            {/* Preview */}
-
-            {preview && (
-              <div className="mt-4">
-                <p className="text-sm font-medium mb-2">Image Preview</p>
-
-                <div className="relative w-full max-w-sm">
-                  <img
-                    src={preview}
-                    alt="Program preview"
-                    className="w-full h-52 object-cover rounded-lg border"
-                  />
-                </div>
-              </div>
-            )}
-          </div>
+          <input type="hidden" {...register("image")} />
+          <MediaComponent
+            title={
+              <ImageInputUIComponent
+                type="large"
+                error=""
+                image={imageUrl || undefined}
+              />
+            }
+            isMultiSelect={false}
+            open={isImageModelOpen}
+            setOpen={setIsImageModelOpen}
+            handleConfirmImage={handleConfirmImage}
+          />
         </div>
 
         {/* ------------------------------------------------------------- */}

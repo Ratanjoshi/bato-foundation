@@ -1,8 +1,41 @@
-require("../../helpers/oauth/google-oauth-helper");
 require("../../helpers/oauth/local-oauth-helper");
 
 const router = require("express").Router();
 const passport = require("passport");
+const oauthConfigured = {
+  google: [
+    "GOOGLE_CLIENT_ID",
+    "GOOGLE_CLIENT_SECRET",
+    "GOOGLE_CALLBACK_URL",
+  ].every((key) => process.env[key]),
+  facebook: [
+    "FACEBOOK_CLIENT_ID",
+    "FACEBOOK_CLIENT_SECRET",
+    "FACEBOOK_CALLBACK_URL",
+  ].every((key) => process.env[key]),
+  apple: [
+    "APPLE_CLIENT_ID",
+    "APPLE_CLIENT_SECRET",
+    "APPLE_TEAM_ID",
+    "APPLE_KEY_ID",
+    "APPLE_PRIVATE_KEY_LOCATION",
+    "APPLE_CALLBACK_URL",
+  ].every((key) => process.env[key]),
+};
+
+if (oauthConfigured.google) require("../../helpers/oauth/google-oauth-helper");
+if (oauthConfigured.facebook)
+  require("../../helpers/oauth/facebook-oauth-helper");
+if (oauthConfigured.apple) require("../../helpers/oauth/apple-oauth-helper");
+
+const oauthHandler = (provider, options) =>
+  oauthConfigured[provider]
+    ? passport.authenticate(provider, options)
+    : (_req, res) =>
+        res.status(503).json({
+          success: false,
+          message: `${provider} sign-in is not configured`,
+        });
 const {
   register,
   profile,
@@ -33,7 +66,7 @@ const {
 
 router.get(
   "/google/callback",
-  passport.authenticate("google", {
+  oauthHandler("google", {
     successRedirect: "/api/v1/customer/oauth-login",
     failureRedirect: "/api/v1/customer/failure",
     scope: ["profile", "email"],
@@ -42,7 +75,7 @@ router.get(
 );
 router.get(
   "/facebook/callback",
-  passport.authenticate("facebook", {
+  oauthHandler("facebook", {
     successRedirect: "/api/v1/customer/oauth-login",
     failureRedirect: "/api/v1/customer/failure",
     scope: "email",
@@ -51,7 +84,7 @@ router.get(
 
 router.get(
   "/apple/callback",
-  passport.authenticate("apple", {
+  oauthHandler("apple", {
     successRedirect: "/api/v1/customer/oauth-login",
     failureRedirect: "/api/v1/customer/failure",
   }),

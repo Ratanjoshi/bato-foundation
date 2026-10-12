@@ -12,6 +12,7 @@ import {
 } from "@/redux/services/batoProgram";
 import { BATO_PROGRAM_ADD_ROUTE } from "@/routes/routeNames";
 import moment from "moment";
+import { IMAGE_BASE_URL } from "@/constants";
 
 const BatoProgramList = () => {
   const navigate = useNavigate();
@@ -151,7 +152,11 @@ const BatoProgramList = () => {
                   <td className="p-3">
                     {p.image ? (
                       <img
-                        src={p.image}
+                        src={
+                          p.image.startsWith("http")
+                            ? p.image
+                            : `${IMAGE_BASE_URL}${p.image}`
+                        }
                         alt={p.title}
                         className="h-12 w-12 object-cover rounded"
                       />
