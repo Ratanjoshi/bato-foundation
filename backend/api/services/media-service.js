@@ -30,12 +30,13 @@ const uploadMedia = async (req) => {
       }
       console.log(mediaCategory);
     }
-    const { path, size, mimetype } = req.file;
+    const { size, mimetype } = req.file;
+    const mediaPath = req.file.path.replace(/\\/g, "/");
 
     // Create a new media entry in the database
     const newMedia = await mediaModel.create({
       name: req.body?.name || generateFileName(req),
-      path: path,
+      path: mediaPath,
       caption: req?.body?.caption,
       description: req?.body?.description,
       sizeInBytes: size,
