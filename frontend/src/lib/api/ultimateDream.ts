@@ -1,4 +1,5 @@
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
+const IMAGE_BASE_URL = process.env.NEXT_PUBLIC_IMAGE_BASE_URL;
 
 export interface UltimateDream {
   id: number;
@@ -31,11 +32,11 @@ export async function getUltimateDream(): Promise<UltimateDream | null> {
   return result.data ?? null;
 }
 
-/** Convert a relative image_url like "/uploads/..." to full backend URL */
+/** Convert a relative image path to a full backend URL. */
 export function resolveImageUrl(url?: string | null): string | null {
   if (!url) return null;
   if (/^https?:\/\//i.test(url)) return url;
-  if (!API_URL) return url;
-  const base = API_URL.replace(/\/api\/v1\/?$/, "");
-  return `${base}${url.startsWith("/") ? "" : "/"}${url}`;
+  if (!IMAGE_BASE_URL) return url;
+  const path = url.replace(/\\/g, "/");
+  return `${IMAGE_BASE_URL.replace(/\/$/, "")}${path.startsWith("/") ? "" : "/"}${path}`;
 }

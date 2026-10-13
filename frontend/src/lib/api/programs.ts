@@ -1,6 +1,9 @@
+import type { Program } from "@/types/program";
+import { resolveImageUrl } from "./ultimateDream";
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-export async function getPrograms() {
+export async function getPrograms(): Promise<Program[]> {
   if (!API_URL) {
     throw new Error("NEXT_PUBLIC_API_URL is not defined");
   }
@@ -15,5 +18,8 @@ export async function getPrograms() {
 
   const result = await response.json();
 
-  return result.data.rows;
+  return result.data.rows.map((program: Program) => ({
+    ...program,
+    image: resolveImageUrl(program.image) ?? "",
+  }));
 }

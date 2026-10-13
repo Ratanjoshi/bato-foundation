@@ -1,16 +1,19 @@
 /** @type {import('next').NextConfig} */
 
+const imageUrl = new URL(
+  process.env.NEXT_PUBLIC_IMAGE_BASE_URL || "http://localhost:8080",
+);
+
 const nextConfig = {
   images: {
     formats: ["image/avif", "image/webp"],
 
-    // Allow Next.js to load program images from the existing backend
     remotePatterns: [
       {
-        protocol: "http",
-        hostname: "localhost",
-        port: "8080",
-        pathname: "/resources/",
+        protocol: imageUrl.protocol.slice(0, -1),
+        hostname: imageUrl.hostname,
+        port: imageUrl.port,
+        pathname: "/resources/**",
       },
     ],
   },
