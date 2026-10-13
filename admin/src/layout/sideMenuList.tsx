@@ -18,7 +18,7 @@ import { SiHomepage } from "react-icons/si";
 import { FaBlog, FaBriefcase } from "react-icons/fa";
 import { TbLogs } from "react-icons/tb";
 import { HiNewspaper } from "react-icons/hi";
-import { Sparkles, Home } from "lucide-react"; // ✅ Added Home
+import { Sparkles, Home, Users } from "lucide-react";
 
 export type SideListMenuType = {
   key: number;
@@ -59,19 +59,19 @@ export const SideMenuList: SideListMenuType[] = [
     icon: <FaBriefcase />,
     menu: [
       {
-        key: 15.1,
+        key: 51,
         name: "Career Category",
         path: "/admin/career-category/list",
         icon: <TbLogs />,
       },
       {
-        key: 15.2,
+        key: 52,
         name: "Career",
         path: "/admin/career/list",
         icon: <FaBriefcase />,
       },
       {
-        key: 15.3,
+        key: 53,
         name: "Applicant",
         path: "/admin/applicant/list",
         icon: <MdPeopleAlt />,
@@ -84,13 +84,13 @@ export const SideMenuList: SideListMenuType[] = [
     icon: <FaBlog />,
     menu: [
       {
-        key: 7.1,
+        key: 61,
         name: "Blog Category",
         path: "/admin/blog-category/list",
         icon: <TbLogs />,
       },
       {
-        key: 7.2,
+        key: 62,
         name: "Blog",
         path: "/admin/blog/list",
         icon: <FaBlog />,
@@ -110,100 +110,106 @@ export const SideMenuList: SideListMenuType[] = [
     icon: <GrTechnology />,
   },
   {
-    key: 13,
+    key: 9,
     name: "BATO Foundation",
     icon: <GiProgression />,
     menu: [
       {
-        key: 13.1,
+        key: 91,
         name: "BATO Programs",
         path: "/admin/bato-program/list",
         icon: <GiProgression />,
       },
       {
-        key: 13.2,
+        key: 92,
         name: "Besides Programs",
         path: "/admin/besides-program/list",
         icon: <Sparkles />,
       },
       {
-        key: 13.3,
+        key: 93,
         name: "Ultimate Dream",
         path: "/admin/ultimate-dream",
         icon: <Sparkles />,
       },
     ],
   },
-  // ✅ NEW: BATO Home section
+  // ✅ BATO Home section
   {
-    key: 14,
+    key: 10,
     name: "BATO Home",
     icon: <Home />,
     menu: [
       {
-        key: 14.1,
+        key: 10.1,
         name: "About Preview",
         path: "/admin/bato-home/about-preview",
         icon: <Sparkles />,
+      },
+      {
+        key: 10.2,
+        name: "Partners",
+        path: "/admin/bato-home/partners",
+        icon: <Users />,
       },
       // 👇 Add future BATO Home items here later (Hero, Mission, Stats, etc.)
     ],
   },
   {
-    key: 9,
+    key: 11,
     name: "Contact",
     icon: <MdOutlineContactPhone />,
     path: "/admin/contact",
   },
   {
-    key: 10,
+    key: 12,
     name: "Subscriber",
     icon: <HiNewspaper />,
     path: "/admin/subscriber",
   },
   {
-    key: 11,
+    key: 13,
     name: "Email Template",
     path: "/admin/email-template/list",
     icon: <MdOutlineMailOutline />,
   },
   {
-    key: 12,
+    key: 14,
     name: "Settings",
     icon: <MdOutlineSettings />,
     menu: [
       {
-        key: 12.1,
+        key: 141,
         name: "Users",
         path: "/admin/auth/list",
         icon: <MdOutlinePerson />,
       },
       {
-        key: 12.2,
+        key: 142,
         name: "Roles",
         path: "/admin/roles/list",
         icon: <MdOutlineFactCheck />,
       },
       {
-        key: 12.3,
+        key: 143,
         name: "Company Settings",
         path: "/admin/settings/list",
         icon: <MdDisplaySettings />,
       },
       {
-        key: 12.4,
+        key: 144,
         name: "Email SMTP",
         path: "/admin/smtp",
         icon: <MdOutlineMailOutline />,
       },
       {
-        key: 12.5,
+        key: 145,
         name: "SEO",
         icon: <RiSeoLine />,
         path: "/admin/seo/list",
       },
       {
-        key: 12.6,
+        key: 146,
         name: "Pages",
         path: "/admin/pages/list",
         icon: <SiHomepage />,

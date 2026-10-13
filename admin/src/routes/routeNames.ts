@@ -75,3 +75,4 @@ export const BESIDES_PROGRAM_LIST_ROUTE = "/admin/besides-program/list";
 export const BESIDES_PROGRAM_ADD_ROUTE = "/admin/besides-program/";
 export const ULTIMATE_DREAM_ROUTE = "/admin/ultimate-dream";
 export const ABOUT_PREVIEW_ROUTE = "/admin/bato-home/about-preview";
+export const PARTNERS_LIST_ROUTE = "/admin/bato-home/partners";

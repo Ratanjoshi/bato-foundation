@@ -25,6 +25,7 @@ const FALLBACK = {
   },
 };
 
+const ImageURL = "http://localhost:8080/";
 async function loadUltimateDream() {
   try {
     const dream = await getUltimateDream();
@@ -37,7 +38,7 @@ async function loadUltimateDream() {
       buttonLabel: dream.button_label || FALLBACK.buttonLabel,
       buttonHref: dream.button_href || FALLBACK.buttonHref,
       image: {
-        url: resolveImageUrl(dream.image_url) ?? FALLBACK.image.url,
+        url: ImageURL + (dream.image_url?.substring(1) || FALLBACK.image.url),
         alt: dream.image_alt || FALLBACK.image.alt,
       },
     };

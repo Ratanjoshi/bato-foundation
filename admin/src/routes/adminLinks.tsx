@@ -50,6 +50,7 @@ import UltimateDream from "@/pages/UltimateDream";
 
 // ✅ NEW: About Preview page
 import AboutPreview from "@/pages/AboutPreview";
+import Partners from "@/pages/Partners";
 
 export const adminLinks = [
   {
@@ -313,5 +314,13 @@ export const adminLinks = [
   {
     path: "/bato-home/about-preview",
     element: <AboutPreview />,
+  },
+  {
+    path: "/bato-home/about-preview",
+    element: <AboutPreview />,
+  },
+  {
+    path: "/bato-home/partners",
+    element: <Partners />,
   },
 ];

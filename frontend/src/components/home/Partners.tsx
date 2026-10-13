@@ -1,10 +1,25 @@
+"use client";
+
+import { useState, useEffect } from "react";
 import { Container } from "@/components/ui/Container";
 import { Section } from "@/components/ui/Section";
 import { Badge } from "@/components/ui/Badge";
 import { Reveal } from "@/components/ui/Reveal";
-import { partners } from "@/data/partners";
 
 export function Partners() {
+  const [partners, setPartners] = useState<string[]>([]);
+
+  useEffect(() => {
+    fetch("http://localhost:8080/api/v1/partners")
+      .then((res) => res.json())
+      .then((json) => {
+        if (json.success) {
+          setPartners(json.data);
+        }
+      })
+      .catch((err) => console.error("Failed to fetch partners:", err));
+  }, []);
+
   // 4 identical sets + the animation moving exactly -50% (= 2 sets) gives a
   // perfectly seamless, never-jumping loop.
   const loop = [...partners, ...partners, ...partners, ...partners];
@@ -21,7 +36,6 @@ export function Partners() {
       </Container>
 
       <div className="group/track relative mt-14 flex overflow-hidden py-4 mask-fade-x">
-        {/* pauses while the visitor hovers the strip */}
         <div className="flex shrink-0 animate-marquee gap-5 pr-5 group-hover/track:[animation-play-state:paused]">
           {loop.map((p, i) => (
             <div

@@ -1259,7 +1259,7 @@
       "actions": [
         {
           "title": "View BATO Programs",
-          "key": "listPrograms",
+          "key": "view",
           "clientPath": "/admin/bato-program/list",
           "serverPath": "/bato-program/admin/list",
           "requestMethod": "GET",
@@ -1312,6 +1312,68 @@
           "serverPath": "/bato-program/:id",
           "requestMethod": "DELETE",
           "list": "BATO Programs"
+        }
+      ]
+    },
+    {
+      "title": "Partners",
+      "key": "Partners",
+      "actions": [
+        {
+          "title": "View Partners",
+          "key": "view",
+          "clientPath": "/admin/bato-home/partners",
+          "serverPath": "/partners",
+          "requestMethod": "GET",
+          "list": "Partners"
+        },
+        {
+          "title": "Edit Partner",
+          "key": "edit",
+          "clientPath": "/admin/bato-home/partners/:id",
+          "serverPath": "/partners/:id",
+          "requestMethod": "PUT",
+          "list": "Partners"
+        },
+        {
+          "title": "View Partner",
+          "key": "view one",
+          "clientPath": "/admin/bato-home/partners/:id",
+          "serverPath": "/partners/:id",
+          "requestMethod": "GET",
+          "list": "Partners"
+        },
+        {
+          "title": "Create Partner",
+          "key": "add",
+          "clientPath": "/admin/bato-home/partners/",
+          "serverPath": "/partners",
+          "requestMethod": "POST",
+          "list": "Partners"
+        },
+        {
+          "title": "Update Partner",
+          "key": "edit",
+          "clientPath": "/admin/bato-home/partners/:id",
+          "serverPath": "/partners/:id",
+          "requestMethod": "PUT",
+          "list": "Partners"
+        },
+        {
+          "title": "Publish Partner",
+          "key": "publishPartner",
+          "clientPath": "/admin/bato-home/partners/:id",
+          "serverPath": "/partners/:id",
+          "requestMethod": "PATCH",
+          "list": "Partners"
+        },
+        {
+          "title": "Delete Partner",
+          "key": "deletePartner",
+          "clientPath": "/admin/bato-home/partners/:id",
+          "serverPath": "/partners/:id",
+          "requestMethod": "DELETE",
+          "list": "Partners"
         }
       ]
     }

@@ -146,8 +146,8 @@ const AuthCarousel = () => {
   const slides = [
     {
       icon: <User className="h-12 w-12 sm:h-16 sm:w-16 mb-4 sm:mb-6" />,
-      title: "Welcome to Nirvana Core",
-      subtitle: "Admin Portal by Tech Nirvana",
+      title: "Welcome to BATO  Admin Portal",
+      subtitle: "Admin Portal by BATO Foundation",
       description: "Manage, Control, and Optimize Your Website with Ease",
       features: [
         "Centralized Access",
