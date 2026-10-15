@@ -10,6 +10,8 @@ import {
 import { handleError, handleResponse } from "@/utils/responseHandler";
 import { checkAccess } from "@/utils/accessHelper";
 import { useEffect, useState } from "react";
+import { useForm, Controller } from "react-hook-form";
+import { useSingleImageHandler } from "@/hooks/useImageHandler";
 import {
   Loader2,
   Save,
@@ -35,7 +37,19 @@ interface UltimateDreamRecord {
   order: number;
 }
 
-const defaults = {
+interface FormValues {
+  eyebrow: string;
+  heading: string;
+  description: string;
+  button_label: string;
+  button_href: string;
+  image_url: string;
+  image_alt: string;
+  is_active: boolean;
+  order: number;
+}
+
+const defaultValues: FormValues = {
   eyebrow: "Our Ultimate Dream",
   heading: "",
   description: "",
@@ -53,22 +67,34 @@ export default function UltimateDream() {
   const { data, isLoading, refetch } = useGetApiQuery(
     `${ULTIMATE_DREAM_URL}admin`,
   );
-  const [createApi] = useCreateApiMutation();
-  const [updateApi] = useUpdateApiMutation();
+  const [createApi, { isLoading: isCreating }] = useCreateApiMutation();
+  const [updateApi, { isLoading: isUpdating }] = useUpdateApiMutation();
 
   const record: UltimateDreamRecord | null = data?.data ?? null;
+  const saving = isCreating || isUpdating;
 
-  const [form, setForm] = useState(defaults);
-  const [saving, setSaving] = useState(false);
+  const {
+    register,
+    handleSubmit,
+    control,
+    getValues,
+    setValue,
+    reset,
+    formState: { errors },
+  } = useForm<FormValues>({
+    defaultValues,
+  });
 
-  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
-
-  const set = <K extends keyof typeof form>(key: K, value: (typeof form)[K]) =>
-    setForm((f) => ({ ...f, [key]: value }));
+  const {
+    imageUrl,
+    handleConfirmImage,
+    isImageModelOpen,
+    setIsImageModelOpen,
+  } = useSingleImageHandler(setValue, getValues, "image_url");
 
   useEffect(() => {
     if (!record) return;
-    setForm({
+    reset({
       eyebrow: record.eyebrow ?? "",
       heading: record.heading ?? "",
       description: record.description ?? "",
@@ -79,21 +105,14 @@ export default function UltimateDream() {
       is_active: record.is_active ?? true,
       order: record.order ?? 0,
     });
-  }, [data]);
-
-  const handleConfirmImage = (picked: any) => {
-    const url =
-      typeof picked === "string" ? picked : (picked?.url ?? picked?.path ?? "");
-    set("image_url", url);
-    setIsImageModalOpen(false);
-  };
+  }, [record, reset]);
 
   const handleReset = () => {
     if (!record) {
-      setForm(defaults);
+      reset(defaultValues);
       return;
     }
-    setForm({
+    reset({
       eyebrow: record.eyebrow,
       heading: record.heading,
       description: record.description,
@@ -106,18 +125,20 @@ export default function UltimateDream() {
     });
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!record?.id && !form.image_url) {
+  const onSubmit = async (values: FormValues) => {
+    if (!record?.id && !values.image_url) {
       alert("Please choose an image before saving.");
       return;
     }
 
     const fd = new FormData();
-    Object.entries(form).forEach(([k, v]) => fd.append(k, String(v)));
+    Object.entries(values).forEach(([k, v]) => fd.append(k, String(v)));
 
-    setSaving(true);
+    // Ensure backend validation sees the 'image' field alongside 'image_url'
+    if (values.image_url) {
+      fd.append("image", values.image_url);
+    }
+
     try {
       const res = record?.id
         ? await updateApi({
@@ -135,8 +156,6 @@ export default function UltimateDream() {
       });
     } catch (error) {
       handleError({ error });
-    } finally {
-      setSaving(false);
     }
   };
 
@@ -182,7 +201,7 @@ export default function UltimateDream() {
             <p className="text-sm text-gray-500">Loading section…</p>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="mt-6 space-y-6">
+          <form onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-6">
             {/* ───────── Hero banner ───────── */}
             <div className="relative overflow-hidden rounded-2xl border border-gray-200 bg-gradient-to-br from-[#123a6b] via-[#1b4a86] to-[#2a63a8] p-6 text-white shadow-sm">
               <div className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-white/10 blur-2xl" />
@@ -205,20 +224,26 @@ export default function UltimateDream() {
                   </div>
                 </div>
 
-                <span
-                  className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium ring-1 ring-inset backdrop-blur ${
-                    form.is_active
-                      ? "bg-emerald-400/20 text-emerald-100 ring-emerald-200/40"
-                      : "bg-white/10 text-white/80 ring-white/20"
-                  }`}
-                >
-                  <span
-                    className={`h-1.5 w-1.5 rounded-full ${
-                      form.is_active ? "bg-emerald-300" : "bg-white/60"
-                    }`}
-                  />
-                  {form.is_active ? "Active" : "Inactive"}
-                </span>
+                <Controller
+                  control={control}
+                  name="is_active"
+                  render={({ field }) => (
+                    <span
+                      className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium ring-1 ring-inset backdrop-blur ${
+                        field.value
+                          ? "bg-emerald-400/20 text-emerald-100 ring-emerald-200/40"
+                          : "bg-white/10 text-white/80 ring-white/20"
+                      }`}
+                    >
+                      <span
+                        className={`h-1.5 w-1.5 rounded-full ${
+                          field.value ? "bg-emerald-300" : "bg-white/60"
+                        }`}
+                      />
+                      {field.value ? "Active" : "Inactive"}
+                    </span>
+                  )}
+                />
               </div>
             </div>
 
@@ -236,10 +261,12 @@ export default function UltimateDream() {
                     <Field
                       label="Eyebrow Text"
                       hint="Small label shown above the heading"
+                      error={errors.eyebrow?.message}
                     >
                       <input
-                        value={form.eyebrow}
-                        onChange={(e) => set("eyebrow", e.target.value)}
+                        {...register("eyebrow", {
+                          required: "Eyebrow is required",
+                        })}
                         className="input"
                         placeholder="Our Ultimate Dream"
                       />
@@ -248,8 +275,7 @@ export default function UltimateDream() {
                   <Field label="Order" hint="Lower numbers appear first">
                     <input
                       type="number"
-                      value={form.order}
-                      onChange={(e) => set("order", Number(e.target.value))}
+                      {...register("order", { valueAsNumber: true })}
                       className="input"
                     />
                   </Field>
@@ -257,8 +283,7 @@ export default function UltimateDream() {
 
                 <Field label="Heading" hint="Main headline of the section">
                   <textarea
-                    value={form.heading}
-                    onChange={(e) => set("heading", e.target.value)}
+                    {...register("heading")}
                     rows={2}
                     className="input resize-none leading-relaxed"
                     placeholder="A Nepal where no child's future is decided by a missing road."
@@ -270,8 +295,7 @@ export default function UltimateDream() {
                   hint="Short supporting paragraph under the heading"
                 >
                   <textarea
-                    value={form.description}
-                    onChange={(e) => set("description", e.target.value)}
+                    {...register("description")}
                     rows={3}
                     className="input resize-none leading-relaxed"
                     placeholder="We dream of classrooms in every valley..."
@@ -291,16 +315,14 @@ export default function UltimateDream() {
               <div className="grid grid-cols-1 gap-5 p-6 md:grid-cols-2">
                 <Field label="Button Label">
                   <input
-                    value={form.button_label}
-                    onChange={(e) => set("button_label", e.target.value)}
+                    {...register("button_label")}
                     className="input"
                     placeholder="Help Build the Dream"
                   />
                 </Field>
                 <Field label="Button Link" hint="Internal path or full URL">
                   <input
-                    value={form.button_href}
-                    onChange={(e) => set("button_href", e.target.value)}
+                    {...register("button_href")}
                     className="input"
                     placeholder="/donate"
                   />
@@ -322,7 +344,7 @@ export default function UltimateDream() {
                     <label className="text-sm font-medium text-gray-700">
                       Background Image <span className="text-red-500">*</span>
                     </label>
-                    {form.image_url && (
+                    {imageUrl && (
                       <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-medium text-emerald-700 ring-1 ring-inset ring-emerald-200">
                         <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
                         Selected
@@ -330,18 +352,19 @@ export default function UltimateDream() {
                     )}
                   </div>
 
+                  <input type="hidden" {...register("image_url")} />
                   <div className="rounded-xl border border-dashed border-gray-200 bg-gray-50/60 p-4 transition hover:border-primaryColor/40 hover:bg-gray-50">
                     <MediaComponent
                       title={
                         <ImageInputUIComponent
                           type="large"
                           error=""
-                          image={form.image_url || undefined}
+                          image={imageUrl || undefined}
                         />
                       }
                       isMultiSelect={false}
-                      open={isImageModalOpen}
-                      setOpen={setIsImageModalOpen}
+                      open={isImageModelOpen}
+                      setOpen={setIsImageModelOpen}
                       handleConfirmImage={handleConfirmImage}
                     />
                   </div>
@@ -358,8 +381,7 @@ export default function UltimateDream() {
                   hint="Describe the image for screen readers"
                 >
                   <input
-                    value={form.image_alt}
-                    onChange={(e) => set("image_alt", e.target.value)}
+                    {...register("image_alt")}
                     className="input"
                     placeholder="A student looking toward the horizon"
                   />
@@ -376,44 +398,50 @@ export default function UltimateDream() {
               />
 
               <div className="p-6">
-                <label className="flex cursor-pointer items-center justify-between gap-4 rounded-xl border border-gray-200 bg-gradient-to-r from-gray-50 to-white p-4 transition hover:border-primaryColor/30 hover:shadow-sm">
-                  <div className="flex items-start gap-3">
-                    <div
-                      className={`mt-0.5 grid h-9 w-9 shrink-0 place-items-center rounded-lg transition ${
-                        form.is_active
-                          ? "bg-emerald-50 text-emerald-600"
-                          : "bg-gray-100 text-gray-400"
-                      }`}
-                    >
-                      <Eye className="h-4 w-4" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-gray-900">
-                        Active on site
-                      </p>
-                      <p className="mt-0.5 text-xs text-gray-500">
-                        When disabled, this section won't appear on the
-                        homepage.
-                      </p>
-                    </div>
-                  </div>
+                <Controller
+                  control={control}
+                  name="is_active"
+                  render={({ field }) => (
+                    <label className="flex cursor-pointer items-center justify-between gap-4 rounded-xl border border-gray-200 bg-gradient-to-r from-gray-50 to-white p-4 transition hover:border-primaryColor/30 hover:shadow-sm">
+                      <div className="flex items-start gap-3">
+                        <div
+                          className={`mt-0.5 grid h-9 w-9 shrink-0 place-items-center rounded-lg transition ${
+                            field.value
+                              ? "bg-emerald-50 text-emerald-600"
+                              : "bg-gray-100 text-gray-400"
+                          }`}
+                        >
+                          <Eye className="h-4 w-4" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-gray-900">
+                            Active on site
+                          </p>
+                          <p className="mt-0.5 text-xs text-gray-500">
+                            When disabled, this section won't appear on the
+                            homepage.
+                          </p>
+                        </div>
+                      </div>
 
-                  <button
-                    type="button"
-                    role="switch"
-                    aria-checked={form.is_active}
-                    onClick={() => set("is_active", !form.is_active)}
-                    className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors duration-200 ${
-                      form.is_active ? "bg-primaryColor" : "bg-gray-300"
-                    }`}
-                  >
-                    <span
-                      className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform duration-200 ${
-                        form.is_active ? "translate-x-6" : "translate-x-1"
-                      }`}
-                    />
-                  </button>
-                </label>
+                      <button
+                        type="button"
+                        role="switch"
+                        aria-checked={field.value}
+                        onClick={() => field.onChange(!field.value)}
+                        className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors duration-200 ${
+                          field.value ? "bg-primaryColor" : "bg-gray-300"
+                        }`}
+                      >
+                        <span
+                          className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform duration-200 ${
+                            field.value ? "translate-x-6" : "translate-x-1"
+                          }`}
+                        />
+                      </button>
+                    </label>
+                  )}
+                />
               </div>
             </section>
 
@@ -496,10 +524,12 @@ function CardHeader({
 function Field({
   label,
   hint,
+  error,
   children,
 }: {
   label: string;
   hint?: string;
+  error?: string;
   children: React.ReactNode;
 }) {
   return (
@@ -508,7 +538,8 @@ function Field({
         {label}
       </label>
       {children}
-      {hint && <p className="mt-1 text-xs text-gray-500">{hint}</p>}
+      {error && <p className="mt-1 text-xs text-red-500">{error}</p>}
+      {hint && !error && <p className="mt-1 text-xs text-gray-500">{hint}</p>}
     </div>
   );
 }

@@ -8,8 +8,8 @@ function resolveUploadPath(imageUrl) {
   // strip leading "/" so path.join treats it as relative
   const relative = imageUrl.replace(/^\/+/, "");
   return path.join(__dirname, "..", "..", relative);
-  //                     ↑     ↑    ↑
-  //                services  api  backend/
+  //                    ↑     ↑    ↑
+  //             services   api  backend/
 }
 
 /**
@@ -37,35 +37,43 @@ exports.getUltimateDreamForAdmin = async () => {
 /**
  * Admin: create a new record.
  */
-exports.createUltimateDream = async (payload, file) => {
+exports.createUltimateDream = async (payload) => {
   const data = { ...payload };
 
-  if (file) {
-    data.image_url = `/uploads/ultimate-dream/${file.filename}`;
+  // Normalize image fields if either 'image' or 'image_url' is provided
+  if (data.image && !data.image_url) {
+    data.image_url = data.image;
   }
+  // Clean up duplicate/temporary keys if needed
+  delete data.image;
 
   return UltimateDream.create(data);
 };
 
 /**
- * Admin: update. Image is optional — only replaces if a new file is sent.
+ * Admin: update record.
  */
-exports.updateUltimateDream = async (id, payload, file) => {
+exports.updateUltimateDream = async (id, payload) => {
   const record = await UltimateDream.findByPk(id);
   if (!record) return null;
 
   const data = { ...payload };
 
-  if (file) {
-    // Remove the old uploaded file (skip seed paths like /images/...)
-    if (
-      record.image_url &&
-      record.image_url.startsWith("/uploads/ultimate-dream/")
-    ) {
-      const oldPath = resolveUploadPath(record.image_url);
-      if (oldPath) fs.promises.unlink(oldPath).catch(() => {});
-    }
-    data.image_url = `/uploads/ultimate-dream/${file.filename}`;
+  // Normalize image fields
+  if (data.image && !data.image_url) {
+    data.image_url = data.image;
+  }
+  delete data.image;
+
+  // If a new image path is provided and it differs from the old one, clean up old file if it was a local upload
+  if (
+    data.image_url &&
+    data.image_url !== record.image_url &&
+    record.image_url &&
+    record.image_url.startsWith("/uploads/ultimate-dream/")
+  ) {
+    const oldPath = resolveUploadPath(record.image_url);
+    if (oldPath) fs.promises.unlink(oldPath).catch(() => {});
   }
 
   await record.update(data);
