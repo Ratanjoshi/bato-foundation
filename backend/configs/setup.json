@@ -1259,7 +1259,7 @@
       "actions": [
         {
           "title": "View BATO Programs",
-          "key": "",
+          "key": "view",
           "clientPath": "/admin/bato-program/list",
           "serverPath": "/bato-program/admin/list",
           "requestMethod": "GET",
