@@ -21,7 +21,9 @@ exports.getPublicBesidesPrograms = async (req, res, next) => {
     });
 
     return res.status(200).json({
+      success: true,
       title: "Success",
+      msg: "Besides programs fetched successfully",
       message: "Besides programs fetched successfully",
       data: items,
     });
@@ -42,7 +44,9 @@ exports.createBesidesProgram = async (req, res, next) => {
     const existing = await BesidesProgram.findOne({ where: { title } });
     if (existing) {
       return res.status(409).json({
+        success: false,
         title: "Conflict",
+        msg: "An item with this title already exists",
         message: "An item with this title already exists",
         data: [],
       });
@@ -57,7 +61,9 @@ exports.createBesidesProgram = async (req, res, next) => {
     });
 
     return res.status(201).json({
+      success: true,
       title: "Success",
+      msg: "Besides program created successfully",
       message: "Besides program created successfully",
       data: item,
     });
@@ -74,7 +80,9 @@ exports.updateBesidesProgram = async (req, res, next) => {
 
     if (!item) {
       return res.status(404).json({
+        success: false,
         title: "Not Found",
+        msg: "Besides program not found",
         message: "Besides program not found",
         data: [],
       });
@@ -86,7 +94,9 @@ exports.updateBesidesProgram = async (req, res, next) => {
       });
       if (dup) {
         return res.status(409).json({
+          success: false,
           title: "Conflict",
+          msg: "An item with this title already exists",
           message: "An item with this title already exists",
           data: [],
         });
@@ -96,7 +106,9 @@ exports.updateBesidesProgram = async (req, res, next) => {
     await item.update(req.body);
 
     return res.status(200).json({
+      success: true,
       title: "Success",
+      msg: "Besides program updated successfully",
       message: "Besides program updated successfully",
       data: item,
     });
@@ -114,14 +126,18 @@ exports.deleteBesidesProgram = async (req, res, next) => {
 
     if (!deleted) {
       return res.status(404).json({
+        success: false,
         title: "Not Found",
+        msg: "Besides program not found",
         message: "Besides program not found",
         data: [],
       });
     }
 
     return res.status(200).json({
+      success: true,
       title: "Success",
+      msg: "Besides program deleted successfully",
       message: "Besides program deleted successfully",
       data: [],
     });
@@ -137,14 +153,18 @@ exports.getBesidesProgram = async (req, res, next) => {
 
     if (!item) {
       return res.status(404).json({
+        success: false,
         title: "Not Found",
+        msg: "Besides program not found",
         message: "Besides program not found",
         data: [],
       });
     }
 
     return res.status(200).json({
+      success: true,
       title: "Success",
+      msg: "OK",
       message: "OK",
       data: item,
     });
@@ -184,7 +204,9 @@ exports.listBesidesProgram = async (req, res, next) => {
     });
 
     return res.status(200).json({
+      success: true,
       title: "Success",
+      msg: "Besides programs fetched successfully",
       message: "Besides programs fetched successfully",
       data: rows,
       meta: {
@@ -206,7 +228,9 @@ exports.togglePublishBesidesProgram = async (req, res, next) => {
 
     if (!item) {
       return res.status(404).json({
+        success: false,
         title: "Not Found",
+        msg: "Besides program not found",
         message: "Besides program not found",
         data: [],
       });
@@ -215,7 +239,9 @@ exports.togglePublishBesidesProgram = async (req, res, next) => {
     await item.update({ isPublished: !item.isPublished });
 
     return res.status(200).json({
+      success: true,
       title: "Success",
+      msg: `Item ${item.isPublished ? "published" : "unpublished"} successfully`,
       message: `Item ${item.isPublished ? "published" : "unpublished"} successfully`,
       data: item,
     });
@@ -244,7 +270,9 @@ exports.reorderBesidesProgram = async (req, res, next) => {
     if (invalid.length) {
       await t.rollback();
       return res.status(400).json({
+        success: false,
         title: "Bad Request",
+        msg: `Invalid item IDs: ${invalid.join(", ")}`,
         message: `Invalid item IDs: ${invalid.join(", ")}`,
         data: [],
       });
@@ -269,7 +297,9 @@ exports.reorderBesidesProgram = async (req, res, next) => {
     });
 
     return res.status(200).json({
+      success: true,
       title: "Success",
+      msg: "Reordered successfully",
       message: "Reordered successfully",
       data: all,
     });
