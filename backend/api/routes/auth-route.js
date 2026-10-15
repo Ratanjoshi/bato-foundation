@@ -26,23 +26,14 @@ const {
   authentication,
   authorization,
 } = require("../../middlewares/auth-middleware");
-const { isValidCaptcha } = require("../../middlewares/captcha-middleware");
 
 const {
   idValidation,
   paginationValidation,
 } = require("../../validations/common-validation");
-const { loginAttemptMiddleware } = require("../../utils/loginRateLimit");
 
-router.post(
-  "/create",
-  authentication,
-  // authorization,
-  createUserValidation,
-  authCreateUser,
-);
+router.post("/create", authentication, createUserValidation, authCreateUser);
 
-// this route is for getting the profile of the logged in user
 router.get("/profile", authentication, authGetProfile);
 router.get("/getTotalOfManyModel", authentication, getTotalOfManyModel);
 router.put(
@@ -65,7 +56,6 @@ router.put(
   passwordValidation,
   authChangePassword,
 );
-// router.put('/action-request')
 router.put(
   "/reset-password/:id",
   authentication,
@@ -93,18 +83,11 @@ router.put(
   authUpdateUser,
 );
 
-router.patch(
-  "/:id",
-  authentication,
-  // authorization,
-  idValidation,
-  authIsActiveUser,
-);
+router.patch("/:id", authentication, idValidation, authIsActiveUser);
 
-// this route is for getting user by id
 router.get("/:id", authentication, authorization, idValidation, authGetUser);
 
-router.post("/login", loginValidation, loginAttemptMiddleware, authLogin);
+router.post("/login", loginValidation, authLogin);
 router.post("/logout", authentication, authLogout);
 
 module.exports = router;
