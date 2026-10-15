@@ -1,8 +1,6 @@
 const {
-  clipArtModel,
   employeeModel,
   qnaModel,
-  timeTableHeaderModel,
   userModel,
   settingModel,
   socialModel,
@@ -25,11 +23,6 @@ const { Op, literal } = require("sequelize");
 async function checkIfMediaPathInUse(mediaPath) {
   // Define the models and their respective fields
   const checks = [
-    {
-      model: clipArtModel,
-      fields: ["img_png"],
-      name: "ClipArt",
-    },
     {
       model: employeeModel,
       fields: [
@@ -58,11 +51,6 @@ async function checkIfMediaPathInUse(mediaPath) {
       model: socialModel,
       fields: ["fav_icon"],
       name: "Social",
-    },
-    {
-      model: timeTableHeaderModel,
-      fields: ["img_one", "img_two"],
-      name: "TimeTableHeader",
     },
     {
       model: userModel,
