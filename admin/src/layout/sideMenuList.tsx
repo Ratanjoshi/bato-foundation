@@ -11,14 +11,14 @@ import {
 } from "react-icons/md";
 import { RiSeoLine } from "react-icons/ri";
 import { GiKnightBanner, GiProgression } from "react-icons/gi";
-
 import { GrServices, GrTechnology } from "react-icons/gr";
 import { AiFillPropertySafety } from "react-icons/ai";
 import { SiHomepage } from "react-icons/si";
 import { FaBlog, FaBriefcase } from "react-icons/fa";
 import { TbLogs } from "react-icons/tb";
 import { HiNewspaper } from "react-icons/hi";
-import { Sparkles, Home, Users } from "lucide-react";
+import { Sparkles, Home, Users, HeartHandshake } from "lucide-react";
+import { GiCircuitry } from "react-icons/gi";
 
 export type SideListMenuType = {
   key: number;
@@ -111,7 +111,7 @@ export const SideMenuList: SideListMenuType[] = [
   },
   {
     key: 9,
-    name: "BATO Foundation",
+    name: "program pages",
     icon: <GiProgression />,
     menu: [
       {
@@ -134,25 +134,29 @@ export const SideMenuList: SideListMenuType[] = [
       },
     ],
   },
-  // ✅ BATO Home section
   {
     key: 10,
     name: "BATO Home",
     icon: <Home />,
     menu: [
       {
-        key: 10.1,
+        key: 101,
         name: "About Preview",
         path: "/admin/bato-home/about-preview",
         icon: <Sparkles />,
       },
       {
-        key: 10.2,
+        key: 102,
         name: "Partners",
         path: "/admin/bato-home/partners",
         icon: <Users />,
       },
-      // 👇 Add future BATO Home items here later (Hero, Mission, Stats, etc.)
+      {
+        key: 103,
+        name: "What We Do",
+        path: "/admin/what-we-do/list",
+        icon: <GiCircuitry />,
+      },
     ],
   },
   {

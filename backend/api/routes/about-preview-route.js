@@ -5,6 +5,7 @@ const router = require("express").Router();
 const {
   getAboutPreview,
   updateAboutPreview,
+  getPublicAboutPreview,
 } = require("../controllers/about-preview-controller");
 
 const {
@@ -15,17 +16,20 @@ const {
   authentication,
   authorization,
 } = require("../../middlewares/auth-middleware");
-const upload = require("../../configs/multer"); // Import multer config
 
-// Get the current about preview data (for admin form)
+const upload = require("../../configs/multer");
+
+/* PUBLIC */
+router.get("/public", getPublicAboutPreview);
+
+/* ADMIN */
 router.get("/", authentication, authorization, getAboutPreview);
 
-// Update the about preview data (with image upload)
 router.put(
   "/",
   authentication,
   authorization,
-  upload.single("image"), // <-- Multer middleware handles the file
+  upload.single("image"),
   updateAboutPreviewValidation,
   updateAboutPreview,
 );

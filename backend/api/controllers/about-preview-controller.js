@@ -1,8 +1,12 @@
+"use strict";
+
 const { aboutPreviewModel: AboutPreview } = require("../../models");
 const fs = require("fs");
 const path = require("path");
 
-// PUBLIC API
+/* ------------------------------------------------------------------ */
+/* PUBLIC — no auth, only returns published row                        */
+/* ------------------------------------------------------------------ */
 exports.getPublicAboutPreview = async (req, res, next) => {
   try {
     const item = await AboutPreview.findOne({
@@ -28,10 +32,13 @@ exports.getPublicAboutPreview = async (req, res, next) => {
   }
 };
 
-// ADMIN API - Fetch for editing
+/* ------------------------------------------------------------------ */
+/* ADMIN — fetch for the edit form                                     */
+/* ------------------------------------------------------------------ */
 exports.getAboutPreview = async (req, res, next) => {
   try {
     const item = await AboutPreview.findOne({ order: [["id", "DESC"]] });
+
     if (!item) {
       return res.status(404).json({
         title: "Not Found",
@@ -39,26 +46,40 @@ exports.getAboutPreview = async (req, res, next) => {
         data: null,
       });
     }
-    return res
-      .status(200)
-      .json({ title: "Success", message: "OK", data: item });
+
+    return res.status(200).json({
+      title: "Success",
+      message: "OK",
+      data: item,
+    });
   } catch (err) {
     next(err);
   }
 };
 
-// ADMIN API - Update
+/* ------------------------------------------------------------------ */
+/* ADMIN — create or update (accepts imageUrl from body OR file)       */
+/* ------------------------------------------------------------------ */
 exports.updateAboutPreview = async (req, res, next) => {
   try {
     let item = await AboutPreview.findOne({ order: [["id", "DESC"]] });
 
-    // 1. Handle Image Upload
-    let newImageUrl = undefined;
-    if (req.file) {
+    /* ---------------- Resolve new image ---------------- */
+    // Priority 1: an imageUrl string sent by the media library picker
+    let newImageUrl = (req.body.imageUrl || "").trim();
+
+    // Priority 2: a real uploaded file (multer)
+    if (!newImageUrl && req.file) {
       newImageUrl = `/uploads/${req.file.filename}`;
     }
 
-    // 2. If no record exists, create one
+    // Normalize: strip any leading slashes so DB is consistent
+    // (frontend will prepend the backend origin when rendering)
+    if (newImageUrl) {
+      newImageUrl = newImageUrl.replace(/^\/+/, "");
+    }
+
+    /* ---------------- Create first row ---------------- */
     if (!item) {
       if (!newImageUrl) {
         return res.status(400).json({
@@ -74,6 +95,7 @@ exports.updateAboutPreview = async (req, res, next) => {
       };
 
       item = await AboutPreview.create(createData);
+
       return res.status(201).json({
         title: "Success",
         message: "About preview created successfully",
@@ -81,36 +103,52 @@ exports.updateAboutPreview = async (req, res, next) => {
       });
     }
 
-    // 3. If record exists, update it
+    /* ---------------- Update existing row ---------------- */
     const updateData = { ...req.body };
 
     if (newImageUrl) {
       updateData.imageUrl = newImageUrl;
 
-      // Delete old image from filesystem if it exists and is a local upload
-      if (item.imageUrl && item.imageUrl.startsWith("/uploads/")) {
-        const oldImagePath = path.join(__dirname, "../../", item.imageUrl);
-        if (fs.existsSync(oldImagePath)) {
-          fs.unlinkSync(oldImagePath); // Delete old file
+      // If the old file was a local upload and we're replacing it,
+      // delete the old file from disk (best-effort).
+      const oldUrl = item.imageUrl || "";
+      const isLocalUpload =
+        oldUrl.startsWith("/uploads/") || oldUrl.startsWith("uploads/");
+      const isDifferentFile =
+        oldUrl && oldUrl.replace(/^\/+/, "") !== newImageUrl;
+
+      if (isLocalUpload && isDifferentFile) {
+        const oldPath = path.join(
+          __dirname,
+          "../../",
+          oldUrl.replace(/^\/+/, ""),
+        );
+        try {
+          if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
+        } catch (e) {
+          console.warn(
+            "[updateAboutPreview] Could not delete old image:",
+            oldPath,
+            e.message,
+          );
         }
       }
     }
 
     await item.update(updateData);
+
     return res.status(200).json({
       title: "Success",
       message: "About preview updated successfully",
       data: item,
     });
   } catch (err) {
-    // If an error occurs during DB update, delete the newly uploaded file to prevent orphans
+    // Cleanup orphan file if multer wrote one but the DB update failed
     if (req.file) {
-      const newFilePath = path.join(
-        __dirname,
-        "../../uploads",
-        req.file.filename,
-      );
-      if (fs.existsSync(newFilePath)) fs.unlinkSync(newFilePath);
+      const orphan = path.join(__dirname, "../../uploads", req.file.filename);
+      try {
+        if (fs.existsSync(orphan)) fs.unlinkSync(orphan);
+      } catch (_) {}
     }
     next(err);
   }

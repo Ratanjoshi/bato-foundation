@@ -1259,7 +1259,7 @@
       "actions": [
         {
           "title": "View BATO Programs",
-          "key": "view",
+          "key": "",
           "clientPath": "/admin/bato-program/list",
           "serverPath": "/bato-program/admin/list",
           "requestMethod": "GET",
@@ -1374,6 +1374,68 @@
           "serverPath": "/partners/:id",
           "requestMethod": "DELETE",
           "list": "Partners"
+        }
+      ]
+    },
+    {
+      "title": "What We Do",
+      "key": "whatWeDo",
+      "actions": [
+        {
+          "title": "View What We Do",
+          "key": "view",
+          "clientPath": "/admin/what-we-do/list",
+          "serverPath": "/what-we-do",
+          "requestMethod": "GET",
+          "list": "What We Do"
+        },
+        {
+          "title": "View One What We Do",
+          "key": "view-one",
+          "clientPath": "/admin/what-we-do/:id",
+          "serverPath": "/what-we-do/:id",
+          "requestMethod": "GET",
+          "list": "What We Do"
+        },
+        {
+          "title": "Create What We Do",
+          "key": "add",
+          "clientPath": "/admin/what-we-do",
+          "serverPath": "/what-we-do",
+          "requestMethod": "POST",
+          "list": "What We Do"
+        },
+        {
+          "title": "Update What We Do",
+          "key": "edit",
+          "clientPath": "/admin/what-we-do/:id",
+          "serverPath": "/what-we-do/:id",
+          "requestMethod": "PUT",
+          "list": "What We Do"
+        },
+        {
+          "title": "Publish What We Do",
+          "key": "publish",
+          "clientPath": "/admin/what-we-do/:id",
+          "serverPath": "/what-we-do/:id",
+          "requestMethod": "PATCH",
+          "list": "What We Do"
+        },
+        {
+          "title": "Reorder What We Do",
+          "key": "reorder",
+          "clientPath": "/admin/what-we-do/list",
+          "serverPath": "/what-we-do/reorder",
+          "requestMethod": "POST",
+          "list": "What We Do"
+        },
+        {
+          "title": "Delete What We Do",
+          "key": "delete",
+          "clientPath": "/admin/what-we-do/:id",
+          "serverPath": "/what-we-do/:id",
+          "requestMethod": "DELETE",
+          "list": "What We Do"
         }
       ]
     }

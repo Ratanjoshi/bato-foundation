@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Fraunces } from "next/font/google";
 import "./globals.css";
+
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { ScrollProgress } from "@/components/ui/ScrollProgress";
@@ -20,12 +21,15 @@ const display = Fraunces({
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://batofoundation.org"),
+
   title: {
     default: "BATO Foundation — Building Access to Technology & Opportunities",
     template: "%s | BATO Foundation",
   },
+
   description:
     "BATO Foundation brings coding, robotics, AI and STEM education to underserved communities across Nepal — building pathways from technology to opportunity.",
+
   keywords: [
     "BATO Foundation",
     "STEM education Nepal",
@@ -35,6 +39,13 @@ export const metadata: Metadata = {
     "nonprofit Nepal",
     "AI education",
   ],
+
+  icons: {
+    icon: [{ url: "/icon.png", type: "image/png" }],
+    shortcut: "/icon.png",
+    apple: "/icon.png",
+  },
+
   openGraph: {
     title: "BATO Foundation — Building Access to Technology & Opportunities",
     description:
@@ -42,7 +53,9 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_US",
     siteName: "BATO Foundation",
+    url: "https://batofoundation.org",
   },
+
   twitter: {
     card: "summary_large_image",
     title: "BATO Foundation",
@@ -53,16 +66,20 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: {
+}: Readonly<{
   children: React.ReactNode;
-}) {
+}>) {
   return (
     <html lang="en" className={`${sans.variable} ${display.variable}`}>
       <body className="relative">
         <div className="grain" aria-hidden="true" />
+
         <ScrollProgress />
+
         <Navbar />
+
         <main id="main-content">{children}</main>
+
         <Footer />
       </body>
     </html>

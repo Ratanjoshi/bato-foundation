@@ -1,3 +1,5 @@
+"use strict";
+
 const joi = require("joi");
 const httpStatus = require("http-status");
 const responseHelper = require("../helpers/response-helper");
@@ -14,6 +16,7 @@ const updateAboutPreviewValidation = async (req, res, next) => {
     buttonText: joi.string().min(1).max(100).required().label("buttonText"),
     buttonLink: joi.string().min(1).max(255).required().label("buttonLink"),
     imageAlt: joi.string().min(1).max(255).required().label("imageAlt"),
+    imageUrl: joi.string().max(255).allow("").optional().label("imageUrl"), // 👈 ADD
     floatingTitle: joi
       .string()
       .min(1)
@@ -39,6 +42,4 @@ const updateAboutPreviewValidation = async (req, res, next) => {
   return next();
 };
 
-module.exports = {
-  updateAboutPreviewValidation,
-};
+module.exports = { updateAboutPreviewValidation };

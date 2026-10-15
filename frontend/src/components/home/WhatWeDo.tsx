@@ -15,6 +15,12 @@ import {
   FlaskConical,
   Users,
   Compass,
+  Book,
+  Lightbulb,
+  Rocket,
+  Globe,
+  Heart,
+  Star,
   ArrowRight,
   ArrowUpRight,
   Check,
@@ -28,15 +34,76 @@ import { cn } from "@/lib/utils";
 /* ------------------------------------------------------------------ */
 /*  Timing — tweak these to taste                                      */
 /* ------------------------------------------------------------------ */
-const AUTOPLAY_MS = 4500; // time each card stays on screen (was 6000)
-const INTRO_MS = 3200; // how long the slow "page load" entrance lasts
-const SLOW = 1.4; // entrance speed (seconds) — slow & cinematic
-const FAST = 0.55; // card-to-card speed (seconds) — snappy
+const AUTOPLAY_MS = 4500;
+const INTRO_MS = 3200;
+const SLOW = 1.4;
+const FAST = 0.55;
 const EASE_OUT: [number, number, number, number] = [0.22, 1, 0.36, 1];
 const EASE_WIPE: [number, number, number, number] = [0.76, 0, 0.24, 1];
 
-// Edit text / swap images here. Paths point to placeholders in /public/images.
-const items = [
+/* ------------------------------------------------------------------ */
+/*  Icon registry — mirrors admin's ICON_OPTIONS                       */
+/* ------------------------------------------------------------------ */
+const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
+  GraduationCap,
+  Bot,
+  Code2,
+  FlaskConical,
+  Users,
+  Compass,
+  Book,
+  Lightbulb,
+  Rocket,
+  Globe,
+  Heart,
+  Star,
+};
+
+type IconCmp = React.ComponentType<{ className?: string }>;
+
+interface DisplayItem {
+  icon: IconCmp;
+  title: string;
+  desc: string;
+  points: string[];
+  image: string;
+}
+
+interface ApiItem {
+  id: number;
+  icon: string;
+  title: string;
+  slug: string;
+  desc: string;
+  points: string[];
+  image: string | null;
+  order: number;
+  isActive: boolean;
+}
+
+/* ------------------------------------------------------------------ */
+/*  Backend config (from .env.local)                                   */
+/* ------------------------------------------------------------------ */
+const API_ROOT =
+  (process.env.NEXT_PUBLIC_API_URL as string) || "http://localhost:8080/api/v1";
+
+const IMAGE_BASE =
+  (process.env.NEXT_PUBLIC_IMAGE_BASE_URL as string) || "http://localhost:8080";
+
+/* Safely join an image path with the backend origin */
+function resolveImage(image: string | null): string {
+  if (!image) return "/images/programs/placeholder.jpg";
+  if (image.startsWith("http")) return image;
+
+  const base = IMAGE_BASE.replace(/\/+$/, "");
+  const path = image.replace(/^\/+/, "");
+  return `${base}/${path}`;
+}
+
+/* ------------------------------------------------------------------ */
+/*  Fallback — used while loading or if the API fails                  */
+/* ------------------------------------------------------------------ */
+const FALLBACK: DisplayItem[] = [
   {
     icon: GraduationCap,
     title: "STEM Education",
@@ -105,18 +172,75 @@ const items = [
   },
 ];
 
+/* ------------------------------------------------------------------ */
+/*  Map API item → Display item                                        */
+/* ------------------------------------------------------------------ */
+function mapApiToDisplay(list: ApiItem[]): DisplayItem[] {
+  return list
+    .filter((it) => it.isActive !== false)
+    .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+    .map((it) => ({
+      icon: ICON_MAP[it.icon] ?? GraduationCap,
+      title: it.title,
+      desc: it.desc,
+      points: it.points ?? [],
+      image: resolveImage(it.image),
+    }));
+}
+
+/* ------------------------------------------------------------------ */
+/*  Component                                                          */
+/* ------------------------------------------------------------------ */
 export function WhatWeDo() {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { margin: "-15% 0px" });
   const reduce = useReducedMotion();
 
-  const [active, setActive] = useState(0);
-  const [auto, setAuto] = useState(true); // off for good once the visitor clicks
-  const [hover, setHover] = useState(false);
-  const [started, setStarted] = useState(false); // first time section scrolls into view
-  const [ready, setReady] = useState(false); // slow intro finished -> switch to fast mode
+  /* ------------------ Data ------------------ */
+  const [items, setItems] = useState<DisplayItem[]>(FALLBACK);
 
-  // Start the slow entrance only when the section is actually visible
+  useEffect(() => {
+    let cancelled = false;
+
+    (async () => {
+      try {
+        const url = `${API_ROOT.replace(/\/+$/, "")}/what-we-do`;
+        console.log("[WhatWeDo] Fetching:", url);
+
+        const res = await fetch(url, { cache: "no-store" });
+        console.log("[WhatWeDo] Response status:", res.status);
+
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+        const json: { success?: boolean; items?: ApiItem[] } = await res.json();
+        console.log("[WhatWeDo] Data:", json);
+
+        if (cancelled) return;
+
+        if (!json.items?.length) {
+          console.warn("[WhatWeDo] API returned no items — using fallback");
+          return;
+        }
+
+        const mapped = mapApiToDisplay(json.items);
+        if (mapped.length) setItems(mapped);
+      } catch (err) {
+        console.error("[WhatWeDo] Fetch failed — using fallback:", err);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  /* ------------------ Animation state ------------------ */
+  const [active, setActive] = useState(0);
+  const [auto, setAuto] = useState(true);
+  const [hover, setHover] = useState(false);
+  const [started, setStarted] = useState(false);
+  const [ready, setReady] = useState(false);
+
   useEffect(() => {
     if (inView && !started) setStarted(true);
   }, [inView, started]);
@@ -127,11 +251,13 @@ export function WhatWeDo() {
     return () => clearTimeout(t);
   }, [started, reduce]);
 
-  const playing = auto && ready && inView && !hover && !reduce;
-  const idle = auto && !ready; // bar stays empty during the intro
-  const current = items[active];
+  useEffect(() => {
+    if (active >= items.length) setActive(0);
+  }, [items.length, active]);
 
-  // Slow while entering, fast when switching cards
+  const playing = auto && ready && inView && !hover && !reduce;
+  const idle = auto && !ready;
+  const current = items[active] ?? items[0];
   const speed = ready ? FAST : SLOW;
 
   const choose = (i: number) => {
@@ -139,7 +265,7 @@ export function WhatWeDo() {
     setAuto(false);
   };
 
-  /* ---- caption choreography (staggered, faster after intro) ---- */
+  /* ------------------ Motion variants ------------------ */
   const capParent = {
     hidden: {},
     show: {
@@ -175,8 +301,6 @@ export function WhatWeDo() {
       transition: { type: "spring" as const, stiffness: 220, damping: 16 },
     },
   };
-
-  /* ---- section heading choreography (slow) ---- */
   const headParent = {
     hidden: {},
     show: { transition: { staggerChildren: 0.28 } },
@@ -185,6 +309,8 @@ export function WhatWeDo() {
     hidden: reduce ? { opacity: 0 } : { opacity: 0, y: 40 },
     show: { opacity: 1, y: 0, transition: { duration: 1.2, ease: EASE_OUT } },
   };
+
+  if (!current) return null;
 
   return (
     <Section className="relative overflow-hidden bg-primary text-white">
@@ -200,7 +326,7 @@ export function WhatWeDo() {
       />
 
       <Container className="relative">
-        {/* ------------------------- Heading (slow) ------------------------- */}
+        {/* Heading */}
         <motion.div
           className="flex flex-wrap items-end justify-between gap-8"
           variants={headParent}
@@ -259,14 +385,14 @@ export function WhatWeDo() {
           </motion.div>
         </motion.div>
 
-        {/* ---------------------- Interactive road ---------------------- */}
+        {/* Interactive road */}
         <div
           ref={ref}
           className="mt-14 grid gap-10 lg:mt-16 lg:grid-cols-[1fr_1.1fr] lg:gap-16"
           onMouseEnter={() => setHover(true)}
           onMouseLeave={() => setHover(false)}
         >
-          {/* Preview card (above the list on mobile) */}
+          {/* Preview card */}
           <div className="lg:order-2">
             <div className="lg:sticky lg:top-28">
               <motion.div
@@ -295,7 +421,6 @@ export function WhatWeDo() {
               >
                 {started && (
                   <>
-                    {/* Photo: diagonal-free curtain wipe + push-in zoom */}
                     <AnimatePresence initial={false} mode="sync">
                       <motion.div
                         key={active}
@@ -342,7 +467,6 @@ export function WhatWeDo() {
                       </motion.div>
                     </AnimatePresence>
 
-                    {/* Gold scan line that leads the wipe */}
                     {!reduce && (
                       <motion.div
                         key={`scan-${active}`}
@@ -361,7 +485,6 @@ export function WhatWeDo() {
 
                     <div className="absolute inset-0 bg-gradient-to-t from-primary-dark via-primary-dark/55 to-transparent" />
 
-                    {/* Big ghost number */}
                     <AnimatePresence mode="wait" initial={false}>
                       <motion.span
                         key={`n-${active}`}
@@ -383,7 +506,6 @@ export function WhatWeDo() {
                       </motion.span>
                     </AnimatePresence>
 
-                    {/* Caption */}
                     <div className="absolute inset-x-0 bottom-0 z-10 p-6 sm:p-9">
                       <AnimatePresence mode="wait" initial={false}>
                         <motion.div
@@ -450,14 +572,13 @@ export function WhatWeDo() {
             </div>
           </div>
 
-          {/* The road: list of what we do */}
+          {/* The road */}
           <div className="lg:order-1 lg:py-4">
             <ol
               className="relative ml-3"
               role="tablist"
               aria-label="What we do"
             >
-              {/* dashed road line that draws itself downward */}
               <motion.div
                 aria-hidden="true"
                 className="absolute inset-y-0 left-0 w-px origin-top"
@@ -474,7 +595,7 @@ export function WhatWeDo() {
                 const isActive = i === active;
                 return (
                   <motion.li
-                    key={it.title}
+                    key={it.title + i}
                     className="relative"
                     initial={reduce ? { opacity: 0 } : { opacity: 0, x: -50 }}
                     animate={started ? { opacity: 1, x: 0 } : undefined}
@@ -536,7 +657,6 @@ export function WhatWeDo() {
                       />
                     </button>
 
-                    {/* autoplay progress */}
                     <div className="ml-8 h-px bg-white/10">
                       {isActive && (
                         <motion.div

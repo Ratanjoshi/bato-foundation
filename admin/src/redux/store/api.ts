@@ -45,6 +45,7 @@ export const api = createApi({
     "bato-program",
     "besides-program",
     "AboutPreview",
+    "what-we-do",
   ],
 
   endpoints: () => ({}),
