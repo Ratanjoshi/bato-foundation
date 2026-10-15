@@ -1,0 +1,43 @@
+{
+  "index.html": {
+    "file": "assets/index-Dp44DEiA.js",
+    "name": "index",
+    "src": "index.html",
+    "isEntry": true,
+    "css": [
+      "assets/index-CHwapPtL.css"
+    ],
+    "assets": [
+      "assets/brandLogo-D05Yww7S.png",
+      "assets/logo-C3zYhZ6b.svg",
+      "assets/smallLogo-DE53_BSy.webp",
+      "assets/english-CRM_ihKu.png",
+      "assets/japan-DPDezSku.png",
+      "assets/oops-image-rFS4jjSf.png"
+    ]
+  },
+  "src/assets/brandLogo.png": {
+    "file": "assets/brandLogo-D05Yww7S.png",
+    "src": "src/assets/brandLogo.png"
+  },
+  "src/assets/english.png": {
+    "file": "assets/english-CRM_ihKu.png",
+    "src": "src/assets/english.png"
+  },
+  "src/assets/japan.png": {
+    "file": "assets/japan-DPDezSku.png",
+    "src": "src/assets/japan.png"
+  },
+  "src/assets/logo.svg": {
+    "file": "assets/logo-C3zYhZ6b.svg",
+    "src": "src/assets/logo.svg"
+  },
+  "src/assets/oops-image.png": {
+    "file": "assets/oops-image-rFS4jjSf.png",
+    "src": "src/assets/oops-image.png"
+  },
+  "src/assets/smallLogo.webp": {
+    "file": "assets/smallLogo-DE53_BSy.webp",
+    "src": "src/assets/smallLogo.webp"
+  }
+}
