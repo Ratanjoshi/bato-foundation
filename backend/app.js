@@ -59,9 +59,8 @@ app.use(
 );
 
 const allowedOrigins = [
-  "http://192.168.1.251:2004",
-  "https://staging.unimomo.co.uk", // frontend URL
-  "https://admin.unimomo.co.uk",
+  "bato.yourshousing.com",
+  "https://bato.yourshousing.com",
   "http://localhost:2004", // frontend URL
   // frontend URL
 ];
@@ -146,10 +145,6 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 
-app.get("/", (req, res) => {
-  res.send("Hello World!");
-});
-
 app.use(baseUrl + "/api/v1", apiRateLimiter, require("./api")); // -------- main api -----------
 
 app.use("/setup/", setupPath);
@@ -160,7 +155,7 @@ app.use(
   // authentication,
   express.static(path.join(__dirname, "uploads")),
 );
-console.log("Static path:", path.join(__dirname, "../client/web"));
+console.log("Static path:", path.join(__dirname, "../admin/web"));
 app.use((req, res, next) => {
   if (/(.ico|.js|.css|.jpg|.svg|.png|.map)$/i.test(req.path)) {
     next();
@@ -168,10 +163,10 @@ app.use((req, res, next) => {
     res.header("Cache-Control", "private, no-cache, no-store, must-revalidate");
     res.header("Expires", "-1");
     res.header("Pragma", "no-cache");
-    res.sendFile(path.join(__dirname, "../client/web", "index.html"));
+    res.sendFile(path.join(__dirname, "../admin/web", "index.html"));
   }
 });
-app.use("/", express.static(path.join(__dirname, "../client/web")));
+app.use("/", express.static(path.join(__dirname, "../admin/web")));
 
 const MAX_CHUNK_SIZE = 5 * 1024 * 1024; // 5MB cap
 
