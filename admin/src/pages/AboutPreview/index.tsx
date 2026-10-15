@@ -15,11 +15,14 @@ import {
 } from "lucide-react";
 
 import Button from "@/components/Button";
+import PageTitle from "@/components/PageTitle";
 import Input from "@/components/Input";
 import MediaComponent from "@/components/MediaComponent";
 import ImageInputUIComponent from "@/components/ImageInputUIComponent";
+import { useSingleImageHandler } from "@/hooks/useImageHandler";
 import { handleError, handleResponse } from "@/utils/responseHandler";
 import {
+  useCreateAboutPreviewMutation,
   useGetAboutPreviewQuery,
   useUpdateAboutPreviewMutation,
 } from "@/redux/services/aboutPreview";
@@ -41,8 +44,6 @@ interface FormValues {
 
 const AboutPreviewPage = () => {
   /* ───── Media library modal state (same pattern as program section) ───── */
-  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
-
   const {
     data: detail,
     isLoading: isLoadingDetail,
@@ -50,6 +51,8 @@ const AboutPreviewPage = () => {
   } = useGetAboutPreviewQuery("");
   const [updateAboutPreview, { isLoading: isUpdating }] =
     useUpdateAboutPreviewMutation();
+  const [createAboutPreview, { isLoading: isCreating }] =
+    useCreateAboutPreviewMutation();
 
   const {
     register,
@@ -57,6 +60,7 @@ const AboutPreviewPage = () => {
     control,
     reset,
     setValue,
+    getValues,
     watch,
     formState: { errors },
   } = useForm<FormValues>({
@@ -74,6 +78,10 @@ const AboutPreviewPage = () => {
       isPublished: true,
     },
   });
+
+  const { handleConfirmImage, isImageModelOpen, setIsImageModelOpen } =
+    useSingleImageHandler<FormValues>(setValue, getValues, "imageUrl");
+  const isSaving = isCreating || isUpdating;
 
   const imageUrl = watch("imageUrl");
 
@@ -96,14 +104,6 @@ const AboutPreviewPage = () => {
       });
     }
   }, [detail, reset]);
-
-  /* Confirm handler for the media library modal */
-  const handleConfirmImage = (picked: any) => {
-    const url =
-      typeof picked === "string" ? picked : (picked?.url ?? picked?.path ?? "");
-    setValue("imageUrl", url, { shouldDirty: true, shouldValidate: true });
-    setIsImageModalOpen(false);
-  };
 
   /* Reset form back to the last loaded state */
   const handleReset = () => {
@@ -129,23 +129,10 @@ const AboutPreviewPage = () => {
 
   const onSubmit = async (values: FormValues) => {
     try {
-      const formData = new FormData();
-
-      formData.append("badge", values.badge);
-      formData.append("title", values.title);
-      formData.append("paragraph1", values.paragraph1);
-      formData.append("paragraph2", values.paragraph2);
-      formData.append("buttonText", values.buttonText);
-      formData.append("buttonLink", values.buttonLink);
-      formData.append("imageAlt", values.imageAlt);
-      formData.append("floatingTitle", values.floatingTitle);
-      formData.append("floatingText", values.floatingText);
-      formData.append("isPublished", String(values.isPublished));
-
-      // Image is now a URL string from the media library, not a File.
-      formData.append("imageUrl", values.imageUrl);
-
-      const res = await updateAboutPreview(formData).unwrap();
+      const body = { ...values };
+      const res = detail?.data?.id
+        ? await updateAboutPreview({ id: detail.data.id, body }).unwrap()
+        : await createAboutPreview(body).unwrap();
 
       handleResponse({ res });
     } catch (error) {
@@ -273,6 +260,10 @@ const AboutPreviewPage = () => {
                 placeholder="First paragraph..."
                 {...register("paragraph1", {
                   required: "Paragraph 1 is required",
+                  onChange: (event) =>
+                    setValue("paragraph1", event.target.value, {
+                      shouldValidate: true,
+                    }),
                 })}
               />
               {errors.paragraph1 && (
@@ -292,6 +283,10 @@ const AboutPreviewPage = () => {
                 placeholder="Second paragraph..."
                 {...register("paragraph2", {
                   required: "Paragraph 2 is required",
+                  onChange: (event) =>
+                    setValue("paragraph2", event.target.value, {
+                      shouldValidate: true,
+                    }),
                 })}
               />
               {errors.paragraph2 && (
@@ -397,8 +392,8 @@ const AboutPreviewPage = () => {
                     />
                   }
                   isMultiSelect={false}
-                  open={isImageModalOpen}
-                  setOpen={setIsImageModalOpen}
+                  open={isImageModelOpen}
+                  setOpen={setIsImageModelOpen}
                   handleConfirmImage={handleConfirmImage}
                 />
               </div>
@@ -484,11 +479,11 @@ const AboutPreviewPage = () => {
             <div className="flex items-center gap-2">
               <span
                 className={`h-2 w-2 rounded-full ${
-                  isUpdating ? "bg-amber-400 animate-pulse" : "bg-emerald-500"
+                  isSaving ? "bg-amber-400 animate-pulse" : "bg-emerald-500"
                 }`}
               />
               <p className="text-xs text-gray-500">
-                {isUpdating
+                {isSaving
                   ? "Saving your changes…"
                   : "Changes apply to the live homepage section."}
               </p>
@@ -505,15 +500,15 @@ const AboutPreviewPage = () => {
 
               <Button
                 type="submit"
-                disabled={isUpdating}
+                disabled={isSaving}
                 className="inline-flex items-center gap-2 rounded-lg bg-primaryColor px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:opacity-90 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-50"
               >
-                {isUpdating ? (
+                {isSaving ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
                   <Save className="h-4 w-4" />
                 )}
-                {isUpdating ? "Saving..." : "Save Changes"}
+                {isSaving ? "Saving..." : "Save Changes"}
               </Button>
             </div>
           </div>

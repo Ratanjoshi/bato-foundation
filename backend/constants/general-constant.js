@@ -1051,6 +1051,55 @@ module.exports = {
         message: "Notification Already Read",
       },
     },
+    ABOUT_PREVIEW: {
+      FOUND: {
+        status: httpStatus.OK,
+        success: true,
+        message: "About Preview Found",
+      },
+      CREATE_SUCCESS: {
+        status: httpStatus.CREATED,
+        success: true,
+        message: "About Preview Created Successfully",
+      },
+      UPDATE_SUCCESS: {
+        status: httpStatus.OK,
+        success: true,
+        message: "About Preview Updated Successfully",
+      },
+      NOT_FOUND: {
+        status: httpStatus.NOT_FOUND,
+        success: false,
+        message: "About Preview Not Found",
+      },
+    },
+    ULTIMATE_DREAM: {
+      FOUND: {
+        status: httpStatus.OK,
+        success: true,
+        message: "Ultimate Dream Found",
+      },
+      CREATE_SUCCESS: {
+        status: httpStatus.CREATED,
+        success: true,
+        message: "Ultimate Dream Created Successfully",
+      },
+      UPDATE_SUCCESS: {
+        status: httpStatus.OK,
+        success: true,
+        message: "Ultimate Dream Updated Successfully",
+      },
+      DELETE_SUCCESS: {
+        status: httpStatus.OK,
+        success: true,
+        message: "Ultimate Dream Deleted Successfully",
+      },
+      NOT_FOUND: {
+        status: httpStatus.NOT_FOUND,
+        success: false,
+        message: "Ultimate Dream Not Found",
+      },
+    },
     PAGES: {
       CREATE_PAGES_SUCCESS: {
         status: httpStatus.OK,
@@ -2196,6 +2245,38 @@ module.exports = {
         status: httpStatus.OK,
         success: true,
         message: "Program Deleted Successfully",
+      },
+    },
+    WHAT_WE_DO: {
+      CREATE_SUCCESS: {
+        status: httpStatus.OK,
+        success: true,
+        message: "What We Do Created Successfully",
+      },
+      LIST_SUCCESS: {
+        status: httpStatus.OK,
+        success: true,
+        message: "What We Do List Success",
+      },
+      FOUND: {
+        status: httpStatus.OK,
+        success: true,
+        message: "What We Do Found",
+      },
+      NOT_FOUND: {
+        status: httpStatus.NOT_FOUND,
+        success: false,
+        message: "What We Do Not Found",
+      },
+      UPDATE_SUCCESS: {
+        status: httpStatus.OK,
+        success: true,
+        message: "What We Do Updated Successfully",
+      },
+      DELETE_SUCCESS: {
+        status: httpStatus.OK,
+        success: true,
+        message: "What We Do Deleted Successfully",
       },
     },
     SUBSCRIBERS: {

@@ -8,18 +8,28 @@ export const aboutPreviewApi = api.injectEndpoints({
       providesTags: ["AboutPreview"],
     }),
 
-    // PUT: Update the singleton About Preview record (with image upload)
-    updateAboutPreview: builder.mutation({
-      query: (body: FormData) => ({
+    createAboutPreview: builder.mutation({
+      query: (body) => ({
         url: `about-preview/`,
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["AboutPreview"],
+    }),
+
+    updateAboutPreview: builder.mutation({
+      query: ({ id, body }) => ({
+        url: `about-preview/${id}`,
         method: "PUT",
         body,
-        formData: true,
       }),
       invalidatesTags: ["AboutPreview"],
     }),
   }),
 });
 
-export const { useGetAboutPreviewQuery, useUpdateAboutPreviewMutation } =
-  aboutPreviewApi;
+export const {
+  useGetAboutPreviewQuery,
+  useCreateAboutPreviewMutation,
+  useUpdateAboutPreviewMutation,
+} = aboutPreviewApi;

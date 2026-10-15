@@ -1,18 +1,20 @@
-// admin/src/redux/services/whatWeDo.ts
 import { api } from "../store/api";
+import type { WhatWeDoItem } from "@/pages/WhatWeDo/types";
 
-interface WhatWeDoItem {
-  id: number;
-  icon: string;
-  title: string;
-  slug: string;
-  desc: string;
-  points: string[];
-  image: string | null;
-  order: number;
-  isActive: boolean;
-  createdAt?: string;
-  updatedAt?: string;
+interface ApiResponse<T> {
+  success: boolean;
+  data: T;
+  msg?: string;
+}
+
+interface ListResponse {
+  items: WhatWeDoItem[];
+  pagination: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
 }
 
 interface ListQuery {
@@ -22,64 +24,48 @@ interface ListQuery {
   isActive?: boolean;
 }
 
-interface SaveResponse {
-  success: boolean;
-  item: WhatWeDoItem;
-}
-
-interface DetailResponse {
-  success: boolean;
-  item: WhatWeDoItem;
-}
-
 const whatWeDoApi = api.injectEndpoints({
   endpoints: (builder) => ({
-    /* ------------------------------------------------------------------ */
-    /* Create                                                              */
-    /* ------------------------------------------------------------------ */
-    createWhatWeDo: builder.mutation<SaveResponse, Record<string, any>>({
-      query: (body) => ({
-        url: "what-we-do",
-        method: "POST",
-        body,
-      }),
+    createWhatWeDo: builder.mutation<
+      ApiResponse<WhatWeDoItem>,
+      Partial<WhatWeDoItem>
+    >({
+      query: (body) => ({ url: "what-we-do", method: "POST", body }),
       invalidatesTags: ["what-we-do"],
     }),
-
-    /* ------------------------------------------------------------------ */
-    /* List                                                                */
-    /* ------------------------------------------------------------------ */
-    listWhatWeDo: builder.query<
-      { success: boolean; items: WhatWeDoItem[]; pagination: any },
-      ListQuery
-    >({
+    listWhatWeDo: builder.query<ApiResponse<ListResponse>, ListQuery>({
       query: ({ page = 1, limit = 10, search, isActive } = {}) => {
-        const params = new URLSearchParams();
-        params.set("page", String(page));
-        params.set("limit", String(limit));
+        const params = new URLSearchParams({
+          page: String(page),
+          limit: String(limit),
+        });
         if (search) params.set("search", search);
-        if (typeof isActive !== "undefined") {
-          params.set("isActive", String(isActive));
-        }
-        return `what-we-do?${params.toString()}`;
+        if (isActive !== undefined) params.set("isActive", String(isActive));
+        return `what-we-do?${params}`;
       },
+      transformResponse: (
+        response: ApiResponse<any>,
+      ): ApiResponse<ListResponse> => ({
+        ...response,
+        data: {
+          items: response.data?.data ?? [],
+          pagination: {
+            total: response.data?.total ?? 0,
+            page: response.data?.page ?? 1,
+            limit: response.data?.limit ?? 10,
+            totalPages: response.data?.totalPages ?? 1,
+          },
+        },
+      }),
       providesTags: ["what-we-do"],
     }),
-
-    /* ------------------------------------------------------------------ */
-    /* Get By ID                                                           */
-    /* ------------------------------------------------------------------ */
-    getWhatWeDoById: builder.query<DetailResponse, number | string>({
+    getWhatWeDoById: builder.query<ApiResponse<WhatWeDoItem>, number | string>({
       query: (id) => `what-we-do/${id}`,
       providesTags: ["what-we-do"],
     }),
-
-    /* ------------------------------------------------------------------ */
-    /* Update                                                              */
-    /* ------------------------------------------------------------------ */
     updateWhatWeDo: builder.mutation<
-      SaveResponse,
-      { id: number | string; body: Record<string, any> }
+      ApiResponse<WhatWeDoItem>,
+      { id: number | string; body: Partial<WhatWeDoItem> }
     >({
       query: ({ id, body }) => ({
         url: `what-we-do/${id}`,
@@ -88,37 +74,11 @@ const whatWeDoApi = api.injectEndpoints({
       }),
       invalidatesTags: ["what-we-do"],
     }),
-
-    /* ------------------------------------------------------------------ */
-    /* Delete                                                              */
-    /* ------------------------------------------------------------------ */
-    deleteWhatWeDo: builder.mutation<
-      { success: boolean; id: number },
-      number | string
-    >({
-      query: (id) => ({
-        url: `what-we-do/${id}`,
-        method: "DELETE",
-      }),
-      invalidatesTags: ["what-we-do"],
-    }),
-
-    /* ------------------------------------------------------------------ */
-    /* Toggle Active (PATCH)                                               */
-    /* ------------------------------------------------------------------ */
-    toggleWhatWeDoActive: builder.mutation<
-      SaveResponse,
-      { id: number | string; isActive: boolean }
-    >({
-      query: ({ id, isActive }) => ({
-        url: `what-we-do/${id}`,
-        method: "PATCH",
-        body: { isActive },
-      }),
+    deleteWhatWeDo: builder.mutation<ApiResponse<null>, number | string>({
+      query: (id) => ({ url: `what-we-do/${id}`, method: "DELETE" }),
       invalidatesTags: ["what-we-do"],
     }),
   }),
-
   overrideExisting: true,
 });
 
@@ -128,5 +88,4 @@ export const {
   useGetWhatWeDoByIdQuery,
   useUpdateWhatWeDoMutation,
   useDeleteWhatWeDoMutation,
-  useToggleWhatWeDoActiveMutation,
 } = whatWeDoApi;

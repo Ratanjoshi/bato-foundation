@@ -1,40 +1,51 @@
-// backend/api/routes/whatWeDoRoutes.js
-const express = require("express");
-const router = express.Router();
-const controller = require("../controllers/whatWeDoController");
+const router = require("express").Router();
 const {
-  createSchema,
-  updateSchema,
-  reorderSchema,
-  validate,
-} = require("../../validations/whatWeDoValidation");
-const upload = require("../../middlewares/upload");
+  create,
+  deleteById,
+  getById,
+  list,
+  listPublic,
+  reorder,
+  update,
+} = require("../controllers/what-we-do-controller");
+const {
+  whatWeDoPostValidation,
+  whatWeDoPutValidation,
+  whatWeDoReorderValidation,
+} = require("../../validations/what-we-do-validation");
+const { idValidation } = require("../../validations/common-validation");
+const {
+  authentication,
+  authorization,
+} = require("../../middlewares/auth-middleware");
 
-/* ---------------- PUBLIC ---------------- */
-router.get("/public", controller.listPublic);
-
-/* ---------------- ADMIN ----------------- */
-// If you have auth middleware: const auth = require("../../middlewares/auth");
-// router.use(auth);
-
-router.get("/", controller.list);
-router.post("/reorder", validate(reorderSchema), controller.reorder); // MUST be before /:id
-router.get("/:id", controller.getOne);
-
+router.get("/public", listPublic);
+router.get("/", authentication, list);
 router.post(
-  "/",
-  upload.single("image"),
-  validate(createSchema),
-  controller.create,
+  "/reorder",
+  authentication,
+  authorization,
+  whatWeDoReorderValidation,
+  reorder,
 );
-
+router.post("/", authentication, authorization, whatWeDoPostValidation, create);
+router.get("/:id", authentication, authorization, idValidation, getById);
 router.put(
   "/:id",
-  upload.single("image"),
-  validate(updateSchema),
-  controller.update,
+  authentication,
+  authorization,
+  idValidation,
+  whatWeDoPutValidation,
+  update,
 );
-
-router.delete("/:id", controller.remove);
+router.patch(
+  "/:id",
+  authentication,
+  authorization,
+  idValidation,
+  whatWeDoPutValidation,
+  update,
+);
+router.delete("/:id", authentication, authorization, idValidation, deleteById);
 
 module.exports = router;

@@ -1,100 +1,49 @@
 const { UltimateDream } = require("../../models");
-const fs = require("fs");
-const path = require("path");
+const generalConstant = require("../../constants/general-constant");
 
-/* Resolve the on-disk path for an image_url like "/uploads/ultimate-dream/xxx.jpg" */
-function resolveUploadPath(imageUrl) {
-  if (!imageUrl) return null;
-  // strip leading "/" so path.join treats it as relative
-  const relative = imageUrl.replace(/^\/+/, "");
-  return path.join(__dirname, "..", "..", relative);
-  //                    ↑     ↑    ↑
-  //             services   api  backend/
-}
-
-/**
- * Public: return the active section for the site.
- */
-exports.getActiveUltimateDream = async () => {
-  return UltimateDream.findOne({
+const getActive = async () => {
+  const data = await UltimateDream.findOne({
     where: { is_active: true },
     order: [
       ["order", "ASC"],
       ["created_at", "DESC"],
     ],
   });
+
+  return { ...generalConstant.EN.ULTIMATE_DREAM.FOUND, data };
 };
 
-/**
- * Admin: return the most recent record for the edit form.
- */
-exports.getUltimateDreamForAdmin = async () => {
-  return UltimateDream.findOne({
+const getForAdmin = async () => {
+  const data = await UltimateDream.findOne({
     order: [["created_at", "DESC"]],
   });
+
+  return { ...generalConstant.EN.ULTIMATE_DREAM.FOUND, data };
 };
 
-/**
- * Admin: create a new record.
- */
-exports.createUltimateDream = async (payload) => {
-  const data = { ...payload };
-
-  // Normalize image fields if either 'image' or 'image_url' is provided
-  if (data.image && !data.image_url) {
-    data.image_url = data.image;
-  }
-  // Clean up duplicate/temporary keys if needed
-  delete data.image;
-
-  return UltimateDream.create(data);
+const create = async (req) => {
+  const data = await UltimateDream.create(req.body);
+  return { ...generalConstant.EN.ULTIMATE_DREAM.CREATE_SUCCESS, data };
 };
 
-/**
- * Admin: update record.
- */
-exports.updateUltimateDream = async (id, payload) => {
-  const record = await UltimateDream.findByPk(id);
-  if (!record) return null;
-
-  const data = { ...payload };
-
-  // Normalize image fields
-  if (data.image && !data.image_url) {
-    data.image_url = data.image;
-  }
-  delete data.image;
-
-  // If a new image path is provided and it differs from the old one, clean up old file if it was a local upload
-  if (
-    data.image_url &&
-    data.image_url !== record.image_url &&
-    record.image_url &&
-    record.image_url.startsWith("/uploads/ultimate-dream/")
-  ) {
-    const oldPath = resolveUploadPath(record.image_url);
-    if (oldPath) fs.promises.unlink(oldPath).catch(() => {});
+const update = async (req) => {
+  const record = await UltimateDream.findByPk(req.params.id);
+  if (!record) {
+    return { ...generalConstant.EN.ULTIMATE_DREAM.NOT_FOUND, data: null };
   }
 
-  await record.update(data);
-  return record;
+  await record.update(req.body);
+  return { ...generalConstant.EN.ULTIMATE_DREAM.UPDATE_SUCCESS, data: record };
 };
 
-/**
- * Admin: delete. Also removes the uploaded file from disk.
- */
-exports.deleteUltimateDream = async (id) => {
-  const record = await UltimateDream.findByPk(id);
-  if (!record) return null;
-
-  if (
-    record.image_url &&
-    record.image_url.startsWith("/uploads/ultimate-dream/")
-  ) {
-    const oldPath = resolveUploadPath(record.image_url);
-    if (oldPath) fs.promises.unlink(oldPath).catch(() => {});
+const remove = async (req) => {
+  const record = await UltimateDream.findByPk(req.params.id);
+  if (!record) {
+    return { ...generalConstant.EN.ULTIMATE_DREAM.NOT_FOUND, data: null };
   }
 
   await record.destroy();
-  return true;
+  return { ...generalConstant.EN.ULTIMATE_DREAM.DELETE_SUCCESS, data: null };
 };
+
+module.exports = { getActive, getForAdmin, create, update, remove };

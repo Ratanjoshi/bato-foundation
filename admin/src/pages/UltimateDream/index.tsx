@@ -131,23 +131,15 @@ export default function UltimateDream() {
       return;
     }
 
-    const fd = new FormData();
-    Object.entries(values).forEach(([k, v]) => fd.append(k, String(v)));
-
-    // Ensure backend validation sees the 'image' field alongside 'image_url'
-    if (values.image_url) {
-      fd.append("image", values.image_url);
-    }
-
     try {
       const res = record?.id
         ? await updateApi({
             url: `${ULTIMATE_DREAM_URL}${record.id}`,
-            body: fd,
+            body: values,
           }).unwrap()
         : await createApi({
             url: ULTIMATE_DREAM_URL,
-            body: fd,
+            body: values,
           }).unwrap();
 
       handleResponse({

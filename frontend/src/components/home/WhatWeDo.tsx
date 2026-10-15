@@ -204,7 +204,7 @@ export function WhatWeDo() {
 
     (async () => {
       try {
-        const url = `${API_ROOT.replace(/\/+$/, "")}/what-we-do`;
+        const url = `${API_ROOT.replace(/\/+$/, "")}/what-we-do/public`;
         console.log("[WhatWeDo] Fetching:", url);
 
         const res = await fetch(url, { cache: "no-store" });

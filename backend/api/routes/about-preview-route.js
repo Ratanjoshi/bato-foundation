@@ -4,20 +4,18 @@ const router = require("express").Router();
 
 const {
   getAboutPreview,
+  createAboutPreview,
   updateAboutPreview,
   getPublicAboutPreview,
 } = require("../controllers/about-preview-controller");
 
-const {
-  updateAboutPreviewValidation,
-} = require("../../validations/about-preview-validation");
+const validation = require("../../validations/about-preview-validation");
 
 const {
   authentication,
   authorization,
 } = require("../../middlewares/auth-middleware");
-
-const upload = require("../../configs/multer");
+const { idValidation } = require("../../validations/common-validation");
 
 /* PUBLIC */
 router.get("/public", getPublicAboutPreview);
@@ -25,12 +23,22 @@ router.get("/public", getPublicAboutPreview);
 /* ADMIN */
 router.get("/", authentication, authorization, getAboutPreview);
 
-router.put(
+router.post(
   "/",
   authentication,
   authorization,
-  upload.single("image"),
-  updateAboutPreviewValidation,
+  validation.json,
+  validation.create,
+  createAboutPreview,
+);
+
+router.put(
+  "/:id",
+  authentication,
+  authorization,
+  idValidation,
+  validation.json,
+  validation.update,
   updateAboutPreview,
 );
 

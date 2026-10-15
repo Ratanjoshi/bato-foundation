@@ -6,7 +6,7 @@ import { FaEdit, FaTrash, FaEye, FaEyeSlash } from "react-icons/fa";
 import {
   useListWhatWeDoQuery,
   useDeleteWhatWeDoMutation,
-  useToggleWhatWeDoActiveMutation,
+  useUpdateWhatWeDoMutation,
 } from "@/redux/services/whatWeDo";
 
 import { handleResponse, handleError } from "@/utils/responseHandler";
@@ -27,16 +27,20 @@ export default function WhatWeDoList() {
   const [search, setSearch] = useState("");
   const [deleteId, setDeleteId] = useState<number | null>(null);
 
-  const { data, isLoading, refetch } = useListWhatWeDoQuery({
+  const {
+    data: response,
+    isLoading,
+    refetch,
+  } = useListWhatWeDoQuery({
     ...query,
     search: search || undefined,
   });
 
   const [deleteItem, { isLoading: isDeleting }] = useDeleteWhatWeDoMutation();
-  const [toggleActive] = useToggleWhatWeDoActiveMutation();
+  const [updateItem] = useUpdateWhatWeDoMutation();
 
-  const items = data?.items ?? [];
-  const pagination = data?.pagination ?? {
+  const items = response?.data.items ?? [];
+  const pagination = response?.data.pagination ?? {
     total: 0,
     page: 1,
     limit: 10,
@@ -62,9 +66,9 @@ export default function WhatWeDoList() {
 
   const handleToggleActive = async (item: WhatWeDoItem) => {
     try {
-      const res = await toggleActive({
+      const res = await updateItem({
         id: item.id,
-        isActive: !item.isActive,
+        body: { isActive: !item.isActive },
       }).unwrap();
       handleResponse({ res, onSuccess: () => {} });
     } catch (error) {

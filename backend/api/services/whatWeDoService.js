@@ -1,124 +1,137 @@
-// backend/services/whatWeDoService.js
 const { Op } = require("sequelize");
+const generalConstant = require("../../constants/general-constant");
 const { WhatWeDo } = require("../../models");
+const paginate = require("../../utils/paginate");
+const slugGenerator = require("../../utils/slugify");
 
-const slugify = (str = "") =>
-  str
-    .toString()
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9\s-]/g, "")
-    .replace(/\s+/g, "-")
-    .replace(/-+/g, "-");
-
-const buildWhere = (query = {}) => {
-  const where = {};
-  if (query.search) {
-    where[Op.or] = [
-      { title: { [Op.like]: `%${query.search}%` } },
-      { desc: { [Op.like]: `%${query.search}%` } },
-    ];
-  }
-  if (query.isActive !== undefined) {
-    where.isActive = query.isActive === "true" || query.isActive === true;
-  }
-  return where;
+const uniqueSlug = async (title, currentId) => {
+  const slug = slugGenerator(title);
+  const existing = await WhatWeDo.findOne({ where: { slug } });
+  return existing && existing.id !== currentId ? `${slug}-${Date.now()}` : slug;
 };
 
-exports.list = async (query = {}) => {
-  const page = Math.max(parseInt(query.page) || 1, 1);
-  const limit = Math.min(Math.max(parseInt(query.limit) || 20, 1), 100);
-  const offset = (page - 1) * limit;
+const create = async (req) => {
+  const data = { ...req.body, slug: await uniqueSlug(req.body.title) };
+  const result = await WhatWeDo.create(data);
 
-  const { rows, count } = await WhatWeDo.findAndCountAll({
-    where: buildWhere(query),
+  return {
+    ...generalConstant.EN.WHAT_WE_DO.CREATE_SUCCESS,
+    data: result,
+  };
+};
+
+const list = async (req) => {
+  const { limit, page, search, isActive } = req.query;
+  const filter = {};
+
+  if (search) {
+    filter[Op.or] = [
+      { title: { [Op.like]: `%${search}%` } },
+      { desc: { [Op.like]: `%${search}%` } },
+    ];
+  }
+  if (isActive !== undefined) filter.isActive = isActive === "true";
+
+  const result = await paginate(WhatWeDo, {
+    limit,
+    page,
+    filters: filter,
     order: [
       ["order", "ASC"],
       ["id", "ASC"],
     ],
-    limit,
-    offset,
   });
 
   return {
-    items: rows,
-    pagination: {
-      total: count,
-      page,
-      limit,
-      totalPages: Math.ceil(count / limit) || 1,
-    },
+    ...generalConstant.EN.WHAT_WE_DO.LIST_SUCCESS,
+    data: result,
   };
 };
 
-exports.listPublic = async () => {
-  return WhatWeDo.findAll({
+const listPublic = async () => {
+  const result = await WhatWeDo.findAll({
     where: { isActive: true },
     order: [
       ["order", "ASC"],
       ["id", "ASC"],
     ],
-    attributes: ["id", "icon", "title", "desc", "points", "image", "order"],
+    attributes: [
+      "id",
+      "icon",
+      "title",
+      "slug",
+      "desc",
+      "points",
+      "image",
+      "order",
+    ],
   });
+
+  return {
+    ...generalConstant.EN.WHAT_WE_DO.LIST_SUCCESS,
+    data: result,
+  };
 };
 
-exports.getById = async (id) => {
-  const item = await WhatWeDo.findByPk(id);
-  if (!item) {
-    const err = new Error("WhatWeDo item not found");
-    err.status = 404;
-    throw err;
-  }
-  return item;
+const getById = async (req) => {
+  const result = await WhatWeDo.findByPk(req.params.id);
+
+  return {
+    ...(result
+      ? generalConstant.EN.WHAT_WE_DO.FOUND
+      : generalConstant.EN.WHAT_WE_DO.NOT_FOUND),
+    data: result,
+  };
 };
 
-exports.create = async (payload) => {
-  const data = { ...payload };
-  if (!data.slug) data.slug = slugify(data.title);
-
-  // Ensure unique slug
-  const existing = await WhatWeDo.findOne({ where: { slug: data.slug } });
-  if (existing) data.slug = `${data.slug}-${Date.now()}`;
-
-  if (!Array.isArray(data.points)) data.points = [];
-  return WhatWeDo.create(data);
-};
-
-exports.update = async (id, payload) => {
-  const item = await exports.getById(id);
-  const data = { ...payload };
-
-  if (data.title && !data.slug) data.slug = slugify(data.title);
-
-  if (data.slug && data.slug !== item.slug) {
-    const existing = await WhatWeDo.findOne({ where: { slug: data.slug } });
-    if (existing && existing.id !== item.id) {
-      data.slug = `${data.slug}-${Date.now()}`;
-    }
+const update = async (req) => {
+  const result = await WhatWeDo.findByPk(req.params.id);
+  if (!result) {
+    return { ...generalConstant.EN.WHAT_WE_DO.NOT_FOUND, data: null };
   }
 
-  if (data.points && !Array.isArray(data.points)) data.points = [];
+  const data = { ...req.body };
+  if (data.title) data.slug = await uniqueSlug(data.title, result.id);
+  await result.update(data);
 
-  await item.update(data);
-  return item;
+  return {
+    ...generalConstant.EN.WHAT_WE_DO.UPDATE_SUCCESS,
+    data: result,
+  };
 };
 
-exports.remove = async (id) => {
-  const item = await exports.getById(id);
-  await item.destroy();
-  return { id };
-};
-
-exports.reorder = async (orderedIds = []) => {
-  if (!Array.isArray(orderedIds) || orderedIds.length === 0) {
-    const err = new Error("orderedIds must be a non-empty array");
-    err.status = 400;
-    throw err;
+const deleteById = async (req) => {
+  const result = await WhatWeDo.findByPk(req.params.id);
+  if (!result) {
+    return { ...generalConstant.EN.WHAT_WE_DO.NOT_FOUND, data: null };
   }
-  await Promise.all(
-    orderedIds.map((id, index) =>
-      WhatWeDo.update({ order: index }, { where: { id } }),
-    ),
-  );
-  return exports.listPublic();
+
+  await result.destroy();
+  return { ...generalConstant.EN.WHAT_WE_DO.DELETE_SUCCESS, data: null };
+};
+
+const reorder = async (req) => {
+  const transaction = await WhatWeDo.sequelize.transaction();
+  try {
+    await Promise.all(
+      req.body.orderedIds.map((id, index) =>
+        WhatWeDo.update({ order: index }, { where: { id }, transaction }),
+      ),
+    );
+    await transaction.commit();
+    return listPublic();
+  } catch (error) {
+    await transaction.rollback();
+    throw error;
+  }
+};
+
+module.exports = {
+  create,
+  list,
+  listPublic,
+  getById,
+  update,
+  deleteById,
+  reorder,
 };

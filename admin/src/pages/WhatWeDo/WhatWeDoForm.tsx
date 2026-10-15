@@ -1,47 +1,44 @@
-// admin/src/pages/WhatWeDo/WhatWeDoForm.tsx
 import { useEffect, useState } from "react";
-import { useForm, Controller } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { useNavigate, useParams } from "react-router-dom";
 import { FaPlus, FaTimes } from "react-icons/fa";
 import { MdArrowBackIos } from "react-icons/md";
 
-import Input from "@/components/Input";
 import Button from "@/components/Button";
-import MediaComponent from "@/components/MediaComponent";
 import ImageInputUIComponent from "@/components/ImageInputUIComponent";
-import { useSingleImageHandler } from "@/hooks/useImageHandler";
-
-import { handleError, handleResponse } from "@/utils/responseHandler";
+import Input from "@/components/Input";
+import MediaComponent from "@/components/MediaComponent";
 import { ICON_OPTIONS } from "@/constants";
-
+import { useSingleImageHandler } from "@/hooks/useImageHandler";
 import {
   useCreateWhatWeDoMutation,
   useGetWhatWeDoByIdQuery,
   useUpdateWhatWeDoMutation,
 } from "@/redux/services/whatWeDo";
+import { handleError, handleResponse } from "@/utils/responseHandler";
+import type { WhatWeDoFormValues } from "./types";
 
-interface FormValues {
-  title: string;
-  desc: string;
-  icon: string;
-  isActive: boolean;
-  image: string; // 👈 MUST be a string path
-}
+const defaultValues: WhatWeDoFormValues = {
+  title: "",
+  desc: "",
+  icon: "GraduationCap",
+  points: [],
+  image: "",
+  order: 0,
+  isActive: true,
+};
 
 export default function WhatWeDoForm() {
   const { id } = useParams<{ id: string }>();
-  const isEdit = Boolean(id);
   const navigate = useNavigate();
-
-  const { data: detail, isLoading: isLoadingDetail } = useGetWhatWeDoByIdQuery(
-    id!,
-    { skip: !isEdit },
-  );
-
+  const isEdit = Boolean(id);
+  const { data: detail, isLoading } = useGetWhatWeDoByIdQuery(id!, {
+    skip: !id,
+  });
   const [createItem, { isLoading: isCreating }] = useCreateWhatWeDoMutation();
   const [updateItem, { isLoading: isUpdating }] = useUpdateWhatWeDoMutation();
-
-  const [points, setPoints] = useState<string[]>([""]);
+  const saving = isCreating || isUpdating;
+  const [points, setPoints] = useState<string[]>([]);
 
   const {
     register,
@@ -51,111 +48,62 @@ export default function WhatWeDoForm() {
     setValue,
     reset,
     formState: { errors },
-  } = useForm<FormValues>({
-    defaultValues: {
-      title: "",
-      desc: "",
-      icon: "GraduationCap",
-      isActive: true,
-      image: "",
-    },
-  });
-
-  /* ---------------- Image handler (SAME as BatoProgram) ---------------- */
+  } = useForm<WhatWeDoFormValues>({ defaultValues });
   const {
     imageUrl,
     handleConfirmImage,
     isImageModelOpen,
     setIsImageModelOpen,
-  } = useSingleImageHandler(setValue, getValues, "image");
+  } = useSingleImageHandler<WhatWeDoFormValues>(setValue, getValues, "image");
 
-  /* ---------------- Load existing for edit ---------------- */
   useEffect(() => {
-    if (isEdit && detail?.item) {
-      const it = detail.item;
-      reset({
-        title: it.title ?? "",
-        desc: it.desc ?? "",
-        icon: it.icon ?? "GraduationCap",
-        isActive: it.isActive ?? true,
-        image: it.image ?? "",
-      });
-      setPoints(it.points?.length ? it.points : [""]);
+    if (detail?.data) {
+      reset({ ...defaultValues, ...detail.data });
+      setPoints(detail.data.points ?? []);
     }
-  }, [detail, isEdit, reset]);
+  }, [detail, reset]);
 
-  /* ---------------- Points helpers ---------------- */
-  const addPoint = () => {
-    if (points.length >= 10) return;
-    setPoints((p) => [...p, ""]);
-  };
-  const removePoint = (idx: number) => {
-    if (points.length === 1) return;
-    setPoints((p) => p.filter((_, i) => i !== idx));
-  };
-  const updatePoint = (idx: number, value: string) =>
-    setPoints((p) => p.map((v, i) => (i === idx ? value : v)));
+  const onSubmit = async (values: WhatWeDoFormValues) => {
+    const body = {
+      ...values,
+      title: values.title.trim(),
+      desc: values.desc.trim(),
+      points: points.map((point) => point.trim()).filter(Boolean),
+    };
 
-  /* ---------------- Submit ---------------- */
-  const onSubmit = async (values: FormValues) => {
     try {
-      const cleanedPoints = points.map((p) => p.trim()).filter(Boolean);
-
-      // Coerce image to a string (defensive — always a string)
-      const safeImage =
-        typeof values.image === "string" ? values.image : imageUrl || "";
-
-      const body = {
-        title: values.title.trim(),
-        desc: values.desc.trim(),
-        icon: values.icon,
-        isActive: Boolean(values.isActive),
-        image: safeImage,
-        points: cleanedPoints,
-      };
-
-      if (isEdit && id) {
-        const res = await updateItem({ id, body }).unwrap();
-        handleResponse({
-          res,
-          onSuccess: () => navigate("/admin/what-we-do/list"),
-        });
-      } else {
-        const res = await createItem(body).unwrap();
-        handleResponse({
-          res,
-          onSuccess: () => navigate("/admin/what-we-do/list"),
-        });
-      }
+      const res = id
+        ? await updateItem({ id, body }).unwrap()
+        : await createItem(body).unwrap();
+      handleResponse({
+        res,
+        onSuccess: () => navigate("/admin/what-we-do/list"),
+      });
     } catch (error) {
       handleError({ error });
     }
   };
 
-  if (isEdit && isLoadingDetail) {
-    return <div className="p-6">Loading...</div>;
-  }
+  if (isEdit && isLoading) return <div className="p-6">Loading...</div>;
 
   return (
     <div className="w-full">
       <button
         type="button"
         onClick={() => navigate("/admin/what-we-do/list")}
-        className="flex items-center gap-2 text-[#0190dd] mb-4"
+        className="mb-4 flex items-center gap-2 text-primaryColor"
       >
         <MdArrowBackIos size={16} /> Back to list
       </button>
-
-      <h1 className="text-xl font-semibold mb-4">
+      <h1 className="mb-4 text-xl font-semibold">
         {isEdit ? "Edit What We Do" : "Add What We Do"}
       </h1>
 
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="bg-white p-6 rounded shadow space-y-6"
+        className="space-y-6 rounded bg-white p-6 shadow"
       >
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Title */}
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <Input
             label="Title"
             isRequired
@@ -166,33 +114,28 @@ export default function WhatWeDoForm() {
             })}
             error={errors.title}
           />
-
-          {/* Icon */}
-          <div className="input-container">
-            <label className="input-label">
-              Icon <span className="text-red-500">*</span>
-            </label>
+          <label className="input-container">
+            <span className="input-label">Icon</span>
             <select
-              className="border rounded px-3 py-2 w-full bg-white"
+              className="w-full rounded border bg-white px-3 py-2"
               {...register("icon")}
             >
-              {ICON_OPTIONS.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
+              {ICON_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
                 </option>
               ))}
             </select>
-          </div>
+          </label>
         </div>
 
-        {/* Description */}
-        <div>
-          <label className="input-label">
+        <label className="block">
+          <span className="input-label">
             Description <span className="text-red-500">*</span>
-          </label>
+          </span>
           <textarea
             rows={4}
-            className="border rounded px-3 py-2 w-full"
+            className="input w-full"
             placeholder="Short description..."
             {...register("desc", {
               required: "Description is required",
@@ -202,46 +145,54 @@ export default function WhatWeDoForm() {
           {errors.desc && (
             <span className="input-error">{errors.desc.message}</span>
           )}
-        </div>
+        </label>
 
-        {/* Points */}
         <div>
-          <label className="input-label">Bullet Points</label>
+          <p className="input-label">Bullet Points</p>
           <div className="space-y-2">
-            {points.map((pt, idx) => (
-              <div key={idx} className="flex items-center gap-2">
+            {points.map((point, index) => (
+              <div key={index} className="flex items-center gap-2">
                 <input
-                  type="text"
-                  value={pt}
-                  onChange={(e) => updatePoint(idx, e.target.value)}
-                  placeholder={`Point ${idx + 1}`}
-                  className="border rounded px-3 py-2 w-full"
+                  className="w-full rounded border px-3 py-2"
+                  placeholder={`Point ${index + 1}`}
                   maxLength={120}
+                  value={point}
+                  onChange={(event) =>
+                    setPoints((current) =>
+                      current.map((value, pointIndex) =>
+                        pointIndex === index ? event.target.value : value,
+                      ),
+                    )
+                  }
                 />
                 <button
                   type="button"
-                  onClick={() => removePoint(idx)}
-                  disabled={points.length === 1}
-                  className="text-red-500 p-2 disabled:opacity-40"
+                  onClick={() =>
+                    setPoints((current) =>
+                      current.filter((_, pointIndex) => pointIndex !== index),
+                    )
+                  }
+                  className="p-2 text-red-500"
+                  aria-label={`Remove point ${index + 1}`}
                 >
                   <FaTimes />
                 </button>
               </div>
             ))}
-            <button
-              type="button"
-              onClick={addPoint}
-              disabled={points.length >= 10}
-              className="flex items-center gap-2 text-[#0190dd] mt-1 disabled:opacity-40"
-            >
-              <FaPlus size={14} /> Add point {points.length >= 10 && "(max 10)"}
-            </button>
+            {points.length < 10 && (
+              <button
+                type="button"
+                onClick={() => setPoints((current) => [...current, ""])}
+                className="mt-1 flex items-center gap-2 text-primaryColor"
+              >
+                <FaPlus size={14} /> Add point
+              </button>
+            )}
           </div>
         </div>
 
-        {/* Image — matches BatoProgram exactly */}
         <div>
-          <label className="input-label">Image</label>
+          <p className="input-label">Image</p>
           <input type="hidden" {...register("image")} />
           <MediaComponent
             title={
@@ -258,34 +209,39 @@ export default function WhatWeDoForm() {
           />
         </div>
 
-        {/* Active */}
         <Controller
           control={control}
           name="isActive"
           render={({ field }) => (
-            <label className="flex items-center gap-2 cursor-pointer">
+            <label className="flex cursor-pointer items-center gap-2">
               <input
                 type="checkbox"
                 checked={field.value}
-                onChange={(e) => field.onChange(e.target.checked)}
+                onChange={field.onChange}
               />
               <span>Active (visible on public site)</span>
             </label>
           )}
         />
+        <Input
+          label="Display order"
+          type="number"
+          {...register("order", { valueAsNumber: true, min: 0 })}
+          error={errors.order}
+        />
 
-        {/* Submit */}
         <div className="flex gap-3 pt-2">
           <Button
             type="submit"
-            isLoading={isCreating || isUpdating}
-            className="bg-primaryColor text-white px-6 py-2 rounded"
+            isLoading={saving}
+            disabled={saving}
+            className="rounded bg-primaryColor px-6 py-2 text-white"
           >
             {isEdit ? "Update" : "Create"}
           </Button>
           <Button
             type="button"
-            className="border px-6 py-2 rounded"
+            className="rounded border px-6 py-2"
             handleClick={() => navigate("/admin/what-we-do/list")}
           >
             Cancel

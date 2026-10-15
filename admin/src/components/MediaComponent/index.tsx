@@ -199,7 +199,7 @@ export default function MediaComponent({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <button onClick={() => setOpen(true)} className="">
+        <button type="button" onClick={() => setOpen(true)} className="">
           {title}
         </button>
       </DialogTrigger>
