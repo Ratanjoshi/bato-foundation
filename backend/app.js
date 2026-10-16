@@ -61,6 +61,7 @@ app.use(
 const allowedOrigins = [
   "bato.yourshousing.com",
   "https://bato.yourshousing.com",
+  "https://bato-foundation.vercel.app",
   "http://localhost:2004", // frontend URL
   // frontend URL
 ];
