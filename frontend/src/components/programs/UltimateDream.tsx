@@ -41,14 +41,35 @@ export function UltimateDream({ data }: Props) {
 
   const imgScale = useTransform(scrollYProgress, [0, 1], [1.15, 1]);
 
-  // Get the image URL returned by the API.
+  // Use the configured backend URL for uploaded images.
+  const imageBaseUrl = (
+    process.env.NEXT_PUBLIC_IMAGE_BASE_URL || "http://localhost:8080"
+  ).replace(/\/+$/, "");
+
+  // Fix image paths and replace localhost with the configured backend.
   const rawImageUrl = data.image?.url?.trim() || "";
 
-  // Correct the incorrect backend image path.
-  const imageUrl = rawImageUrl.replace(
-    "http://localhost:8080/esources/",
-    "http://localhost:8080/resources/",
-  );
+  const imageUrl = (() => {
+    if (!rawImageUrl) return "";
+
+    // Correct the typo in older image paths.
+    const correctedUrl = rawImageUrl.replace(/\/esources\//g, "/resources/");
+
+    try {
+      const url = new URL(correctedUrl, `${imageBaseUrl}/`);
+
+      // Localhost URLs will not work for visitors to the deployed website.
+      if (url.hostname === "localhost" || url.hostname === "127.0.0.1") {
+        const backendUrl = new URL(imageBaseUrl);
+        url.protocol = backendUrl.protocol;
+        url.host = backendUrl.host;
+      }
+
+      return url.toString();
+    } catch {
+      return "";
+    }
+  })();
 
   return (
     <section

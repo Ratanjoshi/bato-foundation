@@ -15,6 +15,12 @@ const nextConfig = {
         port: imageUrl.port,
         pathname: "/resources/**",
       },
+      {
+        protocol: imageUrl.protocol.slice(0, -1),
+        hostname: imageUrl.hostname,
+        port: imageUrl.port,
+        pathname: "/esources/**",
+      },
     ],
   },
 };
