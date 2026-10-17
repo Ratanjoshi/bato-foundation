@@ -1,4 +1,6 @@
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080/api/v1";
+// Hardcode the production URL temporarily if you can't access the hosting dashboard
+const API_URL =
+  import.meta.env.VITE_API_URL || "https://bato.yourshousing.com/api/v1";
 
 export interface Partner {
   id: number;
