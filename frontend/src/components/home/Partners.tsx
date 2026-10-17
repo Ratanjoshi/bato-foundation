@@ -6,11 +6,16 @@ import { Section } from "@/components/ui/Section";
 import { Badge } from "@/components/ui/Badge";
 import { Reveal } from "@/components/ui/Reveal";
 
+// 1. Pull the API URL from Vercel Environment Variables
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080";
+
 export function Partners() {
   const [partners, setPartners] = useState<string[]>([]);
 
   useEffect(() => {
-    fetch("http://localhost:8080/api/v1/partners")
+    // 2. Use the dynamic variable in the fetch URL
+    fetch(`${API_BASE_URL}/api/v1/partners`)
       .then((res) => res.json())
       .then((json) => {
         if (json.success) {
