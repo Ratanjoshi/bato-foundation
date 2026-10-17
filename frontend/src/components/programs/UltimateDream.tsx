@@ -41,14 +41,33 @@ export function UltimateDream({ data }: Props) {
 
   const imgScale = useTransform(scrollYProgress, [0, 1], [1.15, 1]);
 
-  // Get the image URL returned by the API.
+  // Get the image URL returned by the API
   const rawImageUrl = data.image?.url?.trim() || "";
 
-  // Correct the incorrect backend image path.
-  const imageUrl = rawImageUrl.replace(
-    "http://localhost:8080/esources/",
-    "http://localhost:8080/resources/",
-  );
+  // Get the base URL from environment variables (falls back to localhost)
+  const API_BASE_URL =
+    process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080";
+
+  // 1. Fix the backend typo ("esources" -> "resources")
+  let cleanUrl = rawImageUrl.replace("/esources/", "/resources/");
+
+  // 2. Ensure the URL has the correct absolute base URL
+  if (cleanUrl.startsWith("http://") || cleanUrl.startsWith("https://")) {
+    // If the backend accidentally saved a localhost URL in production, fix it
+    if (
+      process.env.NODE_ENV === "production" &&
+      cleanUrl.includes("localhost")
+    ) {
+      cleanUrl = cleanUrl.replace(/http:\/\/localhost:\d+/g, API_BASE_URL);
+    }
+  } else {
+    // If it's a relative path, prepend the API base URL
+    const base = API_BASE_URL.replace(/\/+$/, ""); // strip trailing slash
+    const path = cleanUrl.replace(/^\/+/, ""); // strip leading slash
+    cleanUrl = `${base}/${path}`;
+  }
+
+  const imageUrl = cleanUrl;
 
   return (
     <section
