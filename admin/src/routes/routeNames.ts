@@ -76,3 +76,17 @@ export const WHAT_WE_DO_EDIT_ROUTE = "/admin/what-we-do/:id";
 
 // ✅ NEW: Donation CTA
 export const DONATION_CTA_ROUTE = "/admin/donation-cta";
+
+export const ABOUT_FORMATION_ROUTE = "/admin/about/formation";
+export const ABOUT_DIRECTOR_MESSAGE_ROUTE = "/admin/about/director-message"; // ✅ NEW
+
+export const LEADERSHIP_LIST_ROUTE = "/admin/about/leadership";
+export const LEADERSHIP_ADD_ROUTE = "/admin/about/leadership/add";
+export const LEADERSHIP_EDIT_ROUTE = (id: string | number) =>
+  `/admin/about/leadership/${id}`;
+
+// ✅ NEW: Timeline Routes (Inside About)
+export const TIMELINE_LIST_ROUTE = "/admin/about/timeline/list";
+export const TIMELINE_ADD_ROUTE = "/admin/about/timeline/";
+export const TIMELINE_EDIT_ROUTE = (id: string | number) =>
+  `/admin/about/timeline/${id}`;

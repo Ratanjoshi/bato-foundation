@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { PageHeader } from "@/components/shared/PageHeader";
-import { Formation } from "@/components/about/Formation";
+import { Formation, FormationData } from "@/components/about/Formation"; // ✅ Import type
 import { TimelineSection } from "@/components/about/TimelineSection";
 import { MissionVision } from "@/components/about/MissionVision";
 import { CoreValues } from "@/components/about/CoreValues";
@@ -15,7 +15,32 @@ export const metadata: Metadata = {
     "How BATO Foundation was formed — our mission, vision, timeline, values and leadership team.",
 };
 
-export default function AboutPage() {
+// ✅ 1. Create the fetch function
+async function getFormationData(): Promise<FormationData | null> {
+  try {
+    // Adjust the URL if your backend is hosted elsewhere in production
+    const res = await fetch("http://localhost:8080/api/v1/formation", {
+      next: { revalidate: 60 }, // Caches data for 60 seconds
+    });
+
+    if (!res.ok) {
+      console.error("Failed to fetch formation data");
+      return null;
+    }
+
+    const json = await res.json();
+    return json.data;
+  } catch (error) {
+    console.error("Error fetching formation data:", error);
+    return null;
+  }
+}
+
+// ✅ 2. Make the page function async
+export default async function AboutPage() {
+  // ✅ 3. Fetch the data
+  const formationData = await getFormationData();
+
   return (
     <>
       <PageHeader
@@ -24,7 +49,10 @@ export default function AboutPage() {
         subtitle="Building the road between talent and technology across Nepal."
         image="/images/gallery/header/about.jpg"
       />
-      <Formation />
+
+      {/* ✅ 4. Pass the data to the component */}
+      <Formation data={formationData} />
+
       <TimelineSection />
       <MissionVision />
 

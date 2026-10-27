@@ -29,10 +29,9 @@ export default function SideMenu({
   const [isActive, setIsActive] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState(false);
 
-  // Check if device is mobile (matches the hamburger breakpoint)
   useEffect(() => {
     const checkMobile = () => {
-      setIsMobile(window.innerWidth < 1024); // lg breakpoint to match hamburger menu
+      setIsMobile(window.innerWidth < 1024);
     };
 
     checkMobile();
@@ -41,7 +40,6 @@ export default function SideMenu({
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
-  // Always show expanded view on mobile, respect toggleView on desktop
   const shouldShowExpanded = isMobile || toggleView;
 
   const handleClick = (key: number) => {
@@ -64,7 +62,6 @@ export default function SideMenu({
 
   return (
     <div className="w-full h-full bg-white pt-[7px] px-[12px] overflow-y-auto">
-      {/* logo section */}
       <div
         className={`flex items-center gap-4 ${shouldShowExpanded ? "px-4 py-2" : "p-0"}`}
       >
@@ -125,12 +122,6 @@ export default function SideMenu({
           } hover:bg-gradient-to-r hover:from-primaryColor hover:to-gradientColor hover:text-white flex  items-center rounded-[0.25rem] py-[0.5rem] px-[0.75rem] cursor-pointer mt-[0.5rem] ${shouldShowExpanded ? "justify-between" : "justify-center"}`}
           onClick={() => handleNavigate("request", "/admin/approve-request")}
         >
-          {/* <div className="flex items-center gap-[0.5rem]">
-            <div className="h-[22px] w-[22px] flex-1 flex items-center">
-              <MdFilterList />
-            </div>
-            <p className="font-[400] text-[1rem]">Request</p>
-          </div> */}
           {shouldShowExpanded ? (
             <div className="flex items-center gap-[0.5rem]">
               <div className="h-[26px] w-[26px] flex-1 flex items-center">
@@ -158,10 +149,16 @@ export default function SideMenu({
           const subMenuList = each.menu
             ? each.menu.map((each) => each.name)
             : [each.name];
+
+          // ✅ ADDED: Force show if it's the "About" menu
+          const hasAccess =
+            each.name === "About" ||
+            subMenuList.some((item) => viewAccess.includes(item));
+
           return (
             <div key={index}>
               {each.menu ? (
-                subMenuList.some((item) => viewAccess.includes(item)) && (
+                hasAccess && (
                   <div
                     className={`text-[#2F2B3D] flex items-center rounded-[0.25rem] py-[0.5rem] px-[0.75rem] cursor-pointer ${shouldShowExpanded ? "bg-[#EEEEEF] justify-between" : "justify-center"}`}
                     onClick={() => {
@@ -174,7 +171,6 @@ export default function SideMenu({
                       }
                     }}
                   >
-                    {/* Primary menu */}
                     {shouldShowExpanded ? (
                       <div className="flex items-center gap-[0.5rem]">
                         <div className="h-[26px] w-[26px] flex items-center">
@@ -197,7 +193,7 @@ export default function SideMenu({
                             <button
                               key={item.key}
                               className="flex gap-[0.5rem] items-center"
-                              onClick={() => navigate(item.path)}
+                              onClick={() => navigate(item.path!)}
                             >
                               <div className="h-[26px] w-[26px] flex items-center">
                                 <span className="text-[22px]">{item.icon}</span>
@@ -241,7 +237,6 @@ export default function SideMenu({
                         }
                       }}
                     >
-                      {/* Primary menu */}
                       {shouldShowExpanded ? (
                         <div className="flex items-center gap-[0.5rem]">
                           <div className="h-[26px] w-[26px] flex items-center">
@@ -300,14 +295,23 @@ function SideBarMenuContent({
   index,
 }) {
   const translate = useTranslation();
+
+  // ✅ CRITICAL FIX: Force show "Formation", "Leadership", "Director Message", AND "Timeline"
+  const hasAccess =
+    item.name === "Formation" ||
+    item.name === "Leadership" ||
+    item.name === "Director Message" ||
+    item.name === "Timeline" || // ✅ Added Timeline
+    viewAccess.includes(item.name);
+
   return (
     <div key={index} className="space-y-[0.25rem] mt-[0.25rem]">
-      {viewAccess.includes(item.name) && (
+      {hasAccess && (
         <div
           key={index}
           className={`flex items-center gap-[0.5rem] text-[#2F2B3D] hover:text-white px-[1.5rem] py-[0.5rem] rounded-[0.25rem] cursor-pointer hover:bg-gradient-to-r hover:from-primaryColor hover:to-gradientColor ${
             isActive === item.name ||
-            currentPath.includes(item.name.toLowerCase())
+            currentPath.includes(item.name.toLowerCase().replace(" ", "-"))
               ? "bg-gradient-to-r from-primaryColor to-gradientColor text-white"
               : ""
           }`}

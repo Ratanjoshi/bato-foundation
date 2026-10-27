@@ -8,6 +8,9 @@ import {
   MdOutlinePerson,
   MdOutlineSettings,
   MdPeopleAlt,
+  MdInfo,
+  MdRecordVoiceOver,
+  MdTimeline, // ✅ Added icon for Timeline
 } from "react-icons/md";
 import { RiSeoLine } from "react-icons/ri";
 import { GiKnightBanner, GiProgression } from "react-icons/gi";
@@ -159,61 +162,93 @@ export const SideMenuList: SideListMenuType[] = [
       },
     ],
   },
+  // ✅ ABOUT MENU (Timeline added)
   {
     key: 11,
+    name: "About",
+    icon: <MdInfo />,
+    menu: [
+      {
+        key: 111,
+        name: "Formation",
+        path: "/admin/about/formation",
+        icon: <Sparkles />,
+      },
+      {
+        key: 112,
+        name: "Leadership",
+        path: "/admin/about/leadership",
+        icon: <MdPeopleAlt />,
+      },
+      {
+        key: 113,
+        name: "Director Message",
+        path: "/admin/about/director-message",
+        icon: <MdRecordVoiceOver />,
+      },
+      {
+        key: 114,
+        name: "Timeline", // ✅ NEW
+        path: "/admin/about/timeline/list",
+        icon: <MdTimeline />,
+      },
+    ],
+  },
+  {
+    key: 12,
     name: "Contact",
     icon: <MdOutlineContactPhone />,
     path: "/admin/contact",
   },
   {
-    key: 12,
+    key: 13,
     name: "Subscriber",
     icon: <HiNewspaper />,
     path: "/admin/subscriber",
   },
   {
-    key: 13,
+    key: 14,
     name: "Email Template",
     path: "/admin/email-template/list",
     icon: <MdOutlineMailOutline />,
   },
   {
-    key: 14,
+    key: 15,
     name: "Settings",
     icon: <MdOutlineSettings />,
     menu: [
       {
-        key: 141,
+        key: 151,
         name: "Users",
         path: "/admin/auth/list",
         icon: <MdOutlinePerson />,
       },
       {
-        key: 142,
+        key: 152,
         name: "Roles",
         path: "/admin/roles/list",
         icon: <MdOutlineFactCheck />,
       },
       {
-        key: 143,
+        key: 153,
         name: "Company Settings",
         path: "/admin/settings/list",
         icon: <MdDisplaySettings />,
       },
       {
-        key: 144,
+        key: 154,
         name: "Email SMTP",
         path: "/admin/smtp",
         icon: <MdOutlineMailOutline />,
       },
       {
-        key: 145,
+        key: 155,
         name: "SEO",
         icon: <RiSeoLine />,
         path: "/admin/seo/list",
       },
       {
-        key: 146,
+        key: 156,
         name: "Pages",
         path: "/admin/pages/list",
         icon: <SiHomepage />,

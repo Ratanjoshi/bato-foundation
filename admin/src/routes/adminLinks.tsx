@@ -52,11 +52,19 @@ import WhatWeDoForm from "@/pages/WhatWeDo/WhatWeDoForm";
 import AboutPreview from "@/pages/AboutPreview";
 import Partners from "@/pages/Partners";
 
+// ✅ Import your new admin page
+import FormationAdmin from "@/pages/About/Formation";
+import LeadershipList from "@/pages/Leadership/LeadershipList"; // ✅ New
+import AddEditLeadership from "@/pages/Leadership/AddEditLeadership"; // ✅ New
+import DirectorMessageAdmin from "@/pages/DirectorMessage"; // ✅ NEW
+
+// ✅ Import Timeline Admin Pages
+import TimelineList from "@/pages/Timeline";
+import AddEditTimeline from "@/pages/Timeline/AddEditTimeline";
+
 /**
  * ⚠️ IMPORTANT:
  * paths must NOT start with "/" — routes.tsx prepends "/admin/" to each one.
- * If paths start with "/", the final URL becomes "/admin//path" (double slash),
- * React Router fails to match, and the wrong component renders.
  */
 export const adminLinks = [
   { path: "dashboard", element: <Dashboard /> },
@@ -132,4 +140,18 @@ export const adminLinks = [
   { path: "what-we-do/list", element: <WhatWeDoList /> },
   { path: "what-we-do", element: <WhatWeDoForm /> },
   { path: "what-we-do/:id", element: <WhatWeDoForm /> },
+
+  // ✅ NEW ABOUT FORMATION ROUTE (Matches the /admin/ prefix)
+  { path: "about/formation", element: <FormationAdmin /> },
+  { path: "about/leadership", element: <LeadershipList /> }, // ✅ Added
+  { path: "about/leadership/add", element: <AddEditLeadership /> }, // ✅ Added
+  { path: "about/leadership/:id", element: <AddEditLeadership /> }, // ✅ Added
+
+  // ✅ NEW: Director Message Route
+  { path: "about/director-message", element: <DirectorMessageAdmin /> },
+
+  // ✅ NEW: Timeline Routes (Inside About)
+  { path: "about/timeline/list", element: <TimelineList /> },
+  { path: "about/timeline", element: <AddEditTimeline /> },
+  { path: "about/timeline/:id", element: <AddEditTimeline /> },
 ];

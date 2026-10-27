@@ -5,9 +5,17 @@ import { Section } from "@/components/ui/Section";
 import { Badge } from "@/components/ui/Badge";
 import { Reveal } from "@/components/ui/Reveal";
 import { StaggerContainer, StaggerItem } from "@/components/ui/Stagger";
-import { leadership } from "@/data/team";
 
-// First letter of the first and last word, e.g. "Prashant Thapa" -> "PT"
+export interface LeadershipMember {
+  id: number;
+  name: string;
+  role: string;
+  image: string | null;
+  portfolio: string | null;
+  order: number;
+  published: boolean;
+}
+
 function initials(name: string) {
   const parts = name.trim().split(/\s+/);
   const first = parts[0]?.[0] ?? "";
@@ -15,16 +23,51 @@ function initials(name: string) {
   return (first + last).toUpperCase();
 }
 
-// "https://www.example.com/" -> "www.example.com"
 function displayUrl(url: string) {
   return url.replace(/^https?:\/\//, "").replace(/\/$/, "");
 }
 
-export function Leadership() {
+async function getLeadership(): Promise<LeadershipMember[]> {
+  const apiUrl = (
+    process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080/api/v1"
+  ).replace(/\/$/, "");
+  const url = `${apiUrl}/leadership`;
+
+  try {
+    console.log("[Leadership] Fetching:", url);
+    const res = await fetch(url, {
+      next: { revalidate: 60 },
+    });
+    console.log("[Leadership] Response status:", res.status);
+
+    if (!res.ok) {
+      console.error("[Leadership] Fetch failed:", res.status);
+      return [];
+    }
+
+    const json = await res.json();
+    console.log("[Leadership] Response shape OK:", Object.keys(json));
+
+    return json?.data?.rows ?? json?.data ?? (Array.isArray(json) ? json : []);
+  } catch (error) {
+    console.error("[Leadership] Fetch error:", error);
+    return [];
+  }
+}
+
+export async function Leadership() {
+  const leadership = await getLeadership();
+  console.log("[Leadership] Data count:", leadership.length);
+
+  if (!leadership || leadership.length === 0) return null;
+
+  const imageBaseUrl = (
+    process.env.NEXT_PUBLIC_IMAGE_BASE_URL || "http://localhost:8080"
+  ).replace(/\/$/, "");
+
   return (
     <Section>
       <Container>
-        {/* Heading */}
         <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between md:gap-10">
           <Reveal className="max-w-xl">
             <Badge>Leadership Behind BATO</Badge>
@@ -41,14 +84,19 @@ export function Leadership() {
           </Reveal>
         </div>
 
-        {/* Team */}
         <StaggerContainer className="mx-auto mt-10 grid max-w-sm grid-cols-1 gap-x-6 gap-y-10 sm:mt-12 sm:max-w-none sm:grid-cols-2 lg:mt-16 lg:grid-cols-3 lg:gap-x-8 lg:gap-y-12 xl:gap-x-10">
           {leadership.map((m) => {
+            const imageSrc = m.image
+              ? m.image.startsWith("http")
+                ? m.image
+                : `${imageBaseUrl}${m.image.startsWith("/") ? "" : "/"}${m.image}`
+              : null;
+
             const photo = (
               <>
-                {m.image ? (
+                {imageSrc ? (
                   <Image
-                    src={m.image}
+                    src={imageSrc}
                     alt={m.name}
                     fill
                     sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
@@ -64,7 +112,6 @@ export function Leadership() {
 
                 {m.portfolio && (
                   <>
-                    {/* Dark overlay + URL (desktop hover / keyboard focus) */}
                     <div
                       aria-hidden="true"
                       className="absolute inset-0 hidden items-center justify-center bg-primary/60 px-4 opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-focus-visible:opacity-100 md:flex"
@@ -77,7 +124,6 @@ export function Leadership() {
                       </span>
                     </div>
 
-                    {/* Always-visible URL chip on touch screens (no hover there) */}
                     <span
                       aria-hidden="true"
                       className="absolute inset-x-3 bottom-3 flex items-center justify-center gap-1.5 rounded-full bg-primary/75 px-3 py-2 text-xs font-medium text-white backdrop-blur-sm md:hidden"
@@ -96,7 +142,7 @@ export function Leadership() {
               "group relative block aspect-[4/5] w-full overflow-hidden rounded-2xl bg-muted outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 sm:rounded-3xl";
 
             return (
-              <StaggerItem key={m.name}>
+              <StaggerItem key={m.id}>
                 <article className="flex flex-col items-center text-center">
                   {m.portfolio ? (
                     <a

@@ -1438,6 +1438,88 @@
           "list": "What We Do"
         }
       ]
+    },
+    {
+      "title": "About Formation",
+      "key": "aboutFormation",
+      "actions": [
+        {
+          "title": "View About Formation",
+          "key": "view",
+          "clientPath": "/admin/about/formation",
+          "serverPath": "/formation",
+          "requestMethod": "GET",
+          "list": "About Formation"
+        },
+        {
+          "title": "Edit About Formation",
+          "key": "edit",
+          "clientPath": "/admin/about/formation",
+          "serverPath": "/formation",
+          "requestMethod": "PATCH",
+          "list": "About Formation"
+        }
+      ]
+    },
+    {
+      "title": "About Leadership",
+      "key": "aboutLeadership",
+      "actions": [
+        {
+          "title": "View About Leadership",
+          "key": "view",
+          "clientPath": "/admin/about/leadership",
+          "serverPath": "/leadership",
+          "requestMethod": "GET",
+          "list": "About Leadership"
+        },
+        {
+          "title": "Add About Leadership",
+          "key": "add",
+          "clientPath": "/admin/about/leadership/add",
+          "serverPath": "/leadership",
+          "requestMethod": "POST",
+          "list": "About Leadership"
+        },
+        {
+          "title": "Edit About Leadership",
+          "key": "edit",
+          "clientPath": "/admin/about/leadership/:id",
+          "serverPath": "/leadership/:id",
+          "requestMethod": "PATCH",
+          "list": "About Leadership"
+        },
+        {
+          "title": "Delete About Leadership",
+          "key": "delete",
+          "clientPath": "/admin/about/leadership",
+          "serverPath": "/leadership/:id",
+          "requestMethod": "DELETE",
+          "list": "About Leadership"
+        }
+      ]
+    },
+    {
+      "title": "About Director Message",
+      "key": "aboutDirectorMessage",
+      "actions": [
+        {
+          "title": "View About Director Message",
+          "key": "view",
+          "clientPath": "/admin/about/director-message",
+          "serverPath": "/directormessage/active",
+          "requestMethod": "GET",
+          "list": "Director Message"
+        },
+        {
+          "title": "Edit About Director Message",
+          "key": "edit",
+          "clientPath": "/admin/about/director-message",
+          "serverPath": "/directormessage/1",
+          "requestMethod": "PATCH",
+          "list": "Director Message"
+        }
+      ]
     }
   ]
 }

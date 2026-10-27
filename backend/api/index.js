@@ -10,6 +10,7 @@ fs.readdirSync(routesPath).forEach((file) => {
     const route = require(filePath);
     const routeName = `/${file.replace("-route.js", "")}`;
     router.use(routeName, route);
+    console.log(`✅ API Route mounted: /api/v1${routeName}`);
   }
 });
 
